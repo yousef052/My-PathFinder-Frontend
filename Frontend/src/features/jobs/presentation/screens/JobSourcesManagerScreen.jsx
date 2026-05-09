@@ -2,17 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { useJobSources } from "../../hooks/useJobSources";
-import { useProfile } from "../../../profile/hooks/useProfile";
 import Button from "../../../../core/ui_components/Button";
+import { useAuth } from "../../../../core/context/AuthContext";
 
 const JobSourcesManagerScreen = () => {
   const { sources, isLoading, error, fetchSources, addSource, deleteSource } =
     useJobSources();
-  const { user } = useProfile();
+  const { isAdmin } = useAuth();
 
   // التحقق من الصلاحيات
-  const isAdmin = user?.role === "Admin" || user?.Role === "Admin";
-
   const [formData, setFormData] = useState({
     sourceName: "",
     sourceType: "",

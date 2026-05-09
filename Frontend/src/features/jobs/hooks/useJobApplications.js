@@ -31,6 +31,7 @@ export const useJobApplications = () => {
     setError(null);
     try {
       await jobApplicationService.applyForJob({ jobId, notes });
+      await fetchApplications(); // Fetch immediately after applying
       return true;
     } catch (err) {
       setError(err.response?.data?.message || "فشل في إرسال طلب التقديم.");

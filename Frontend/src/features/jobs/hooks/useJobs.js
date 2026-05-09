@@ -32,8 +32,8 @@ export const useJobs = () => {
       setRecommendedJobs(
         Array.isArray(data) ? data : data?.data || data?.items || [],
       );
-    } catch (err) {
-      console.error("Failed to fetch recommendations", err);
+    } catch {
+      setRecommendedJobs([]);
     } finally {
       setIsLoading(false);
     }

@@ -26,17 +26,16 @@ export const authService = {
   },
 
   resetPassword: async (resetData) => {
-    // إرسال (email, otp, newPassword, confirmNewPassword)
     const response = await apiClient.post("/Auth/Reset-Password", resetData);
     return response.data;
   },
 
-  googleLogin: async (idToken) => {
-    const response = await apiClient.post("/Auth/Google-login", { idToken });
+  // 💡 التعديل هنا: الدالة تستقبل الكائن جاهزاً من الـ Hook
+  googleLogin: async (payload) => {
+    const response = await apiClient.post("/Auth/Google-login", payload);
     return response.data;
   },
 
-  // 💡 إضافة ميزة إعادة إرسال الكود
   resendOtp: async (email) => {
     const response = await apiClient.post("/Auth/resend-otp", { email });
     return response.data;

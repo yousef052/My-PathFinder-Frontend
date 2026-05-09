@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { courseRecommendationService } from "../services/courseRecommendationService";
 
 export const useCourseRecommendation = () => {
@@ -7,20 +7,28 @@ export const useCourseRecommendation = () => {
   const [error, setError] = useState(null);
 
   const fetchRecommendations = useCallback(async (jobTitle = "") => {
+    const cleanTitle =
+      typeof jobTitle === "string" && jobTitle.trim() && jobTitle !== ":1"
+        ? jobTitle.trim()
+        : "";
+
+    if (!cleanTitle) {
+      setRecommendations([]);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+
     try {
-      // 💡 تنظيف النص لضمان عدم إرسال قيم وهمية للسيرفر[cite: 18]
-      const cleanTitle =
-        typeof jobTitle === "string" && jobTitle !== ":1" ? jobTitle : "";
       const data =
         await courseRecommendationService.getMyRecommendations(cleanTitle);
-
-      const finalData = Array.isArray(data)
-        ? data
-        : data?.data || data?.items || [];
-      setRecommendations(finalData);
-    } catch (err) {
+      setRecommendations(
+        Array.isArray(data) ? data : data?.data || data?.items || [],
+      );
+    } catch {
       setError("Failed to fetch recommendations.");
       setRecommendations([]);
     } finally {

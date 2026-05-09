@@ -2,11 +2,13 @@
 
 import { useState, useCallback } from "react";
 import { careerMatchService } from "../services/careerMatchService";
+import { userCareerPathService } from "../../careerPath/services/userCareerPathService";
 
 export const useCareerMatch = () => {
   const [questionnaire, setQuestionnaire] = useState(null);
   const [matchResult, setMatchResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchQuestionnaire = useCallback(async () => {
@@ -43,7 +45,6 @@ export const useCareerMatch = () => {
       return true;
     } catch (err) {
       console.error("Submission Error:", err);
-      // 💡 قراءة الرسالة المباشرة من السيرفر (زي No career paths found)
       const serverError = err.response?.data?.message || err.response?.data;
       setError(
         typeof serverError === "string"
@@ -56,12 +57,29 @@ export const useCareerMatch = () => {
     }
   };
 
+  const enrollInPath = async (careerPathId) => {
+    if (!careerPathId) return false;
+    setIsEnrolling(true);
+    setError(null);
+    try {
+      await userCareerPathService.enroll(careerPathId);
+      return true;
+    } catch (err) {
+      setError("فشل في الالتحاق بالمسار المهني.");
+      return false;
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
+
   return {
     questionnaire,
     matchResult,
     isLoading,
+    isEnrolling,
     error,
     fetchQuestionnaire,
     submitQuestionnaire,
+    enrollInPath,
   };
 };

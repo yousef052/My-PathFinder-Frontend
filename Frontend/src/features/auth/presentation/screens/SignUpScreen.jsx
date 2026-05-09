@@ -1,13 +1,21 @@
 // src/features/auth/presentation/screens/SignUpScreen.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { useSignUp } from "../../hooks/useSignUp";
 import Button from "../../../../core/ui_components/Button";
 import Input from "../../../../core/ui_components/Input";
 
 const SignUpScreen = () => {
-  const { formData, isLoading, error, handleChange, handleSignUp } =
-    useSignUp();
+  const {
+    formData,
+    isLoading,
+    error,
+    handleChange,
+    handleSignUp,
+    handleGoogleSuccess,
+    handleGoogleError,
+  } = useSignUp();
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#F8F9FD] p-6">
@@ -49,13 +57,24 @@ const SignUpScreen = () => {
             />
           </div>
 
-          <Input
-            label="User Name"
-            name="userName"
-            value={formData.userName}
-            onChange={handleChange}
-            className="rounded-2xl bg-slate-50 border-none"
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="User Name"
+              name="userName"
+              value={formData.userName}
+              onChange={handleChange}
+              className="rounded-2xl bg-slate-50 border-none"
+            />
+            <Input
+              label="Phone Number"
+              name="phoneNumber"
+              type="tel"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className="rounded-2xl bg-slate-50 border-none"
+            />
+          </div>
+
           <Input
             label="Email"
             name="email"
@@ -95,6 +114,26 @@ const SignUpScreen = () => {
             </Button>
           </div>
         </form>
+
+        <div className="mt-8 text-center space-y-5">
+          <div className="flex items-center gap-3 text-gray-200">
+            <div className="flex-1 h-[1px] bg-gray-100"></div>
+            <span className="text-[10px] font-black uppercase text-gray-300">
+              Or Sign Up with
+            </span>
+            <div className="flex-1 h-[1px] bg-gray-100"></div>
+          </div>
+          <div className="flex justify-center rounded-full overflow-hidden border border-gray-100">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              ux_mode="popup"
+              theme="outline"
+              shape="pill"
+              width="320px"
+            />
+          </div>
+        </div>
 
         <p className="mt-8 text-center text-[11px] text-gray-400 font-black uppercase">
           Already have account?{" "}

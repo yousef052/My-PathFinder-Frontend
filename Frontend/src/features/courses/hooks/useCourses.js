@@ -55,6 +55,25 @@ export const useCourses = () => {
     }
   };
 
+  // 💡 الدالة المسؤولة عن التسجيل في الكورس
+  const enrollInCourse = async (courseId) => {
+    try {
+      await courseService.enroll(courseId);
+      return true;
+    } catch (err) {
+      if (
+        err.response?.status === 400 &&
+        err.response?.data?.includes("already")
+      ) {
+        alert("You are already enrolled in this course!");
+      } else {
+        console.error("Enrollment failed:", err);
+        alert("Failed to enroll in the course. Please try again.");
+      }
+      return false;
+    }
+  };
+
   return {
     courses,
     isLoading,
@@ -62,5 +81,6 @@ export const useCourses = () => {
     fetchCourses,
     addCourse,
     deleteCourse,
+    enrollInCourse, // 💡 تصدير الدالة لتستخدمها الشاشة
   };
 };

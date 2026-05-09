@@ -1,12 +1,21 @@
 // src/features/profile/hooks/useSkills.js
 import { useState, useEffect, useCallback } from "react";
 import { skillService } from "../services/skillsService";
+import { useNavigate } from "react-router-dom";
 
 export const useSkills = () => {
   const [mySkills, setMySkills] = useState([]);
   const [globalSkills, setGlobalSkills] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  const handleUnauthorized = (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  };
 
   const fetchMySkills = useCallback(async () => {
     try {
@@ -14,8 +23,9 @@ export const useSkills = () => {
       setMySkills(data?.data || data || []);
     } catch (err) {
       console.error("Fetch skills error", err);
+      handleUnauthorized(err);
     }
-  }, []);
+  }, [navigate]);
 
   const fetchGlobalSkills = useCallback(async () => {
     try {
@@ -23,8 +33,9 @@ export const useSkills = () => {
       setGlobalSkills(data?.data || data || []);
     } catch (err) {
       console.error("Fetch global error", err);
+      handleUnauthorized(err);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -36,16 +47,16 @@ export const useSkills = () => {
   const handleAddMySkill = async (skillData) => {
     setIsSubmitting(true);
     try {
-      // إرسال البيانات للباك إند[cite: 34]
       await skillService.addMySkill({
         skillId: skillData.skillId,
         proficiencyLevel: skillData.proficiencyLevel || "Beginner",
         source: skillData.source || "Manual",
       });
-      await fetchMySkills(); // تحديث القائمة فوراً
+      await fetchMySkills();
       return true;
     } catch (err) {
       console.error("Backend error during skill add", err);
+      handleUnauthorized(err);
       return false;
     } finally {
       setIsSubmitting(false);
@@ -61,6 +72,7 @@ export const useSkills = () => {
       await skillService.removeMySkill(userSkillId);
     } catch (err) {
       setMySkills(previous);
+      handleUnauthorized(err);
     }
   };
 

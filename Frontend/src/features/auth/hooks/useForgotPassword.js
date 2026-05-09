@@ -17,6 +17,7 @@ export const useForgotPassword = () => {
 
     try {
       await authService.forgotPassword({ email });
+      // حفظ الإيميل وتحديد نوع العملية
       sessionStorage.setItem("pending_email", email);
       sessionStorage.setItem("is_password_reset", "true");
       navigate("/verify-email");

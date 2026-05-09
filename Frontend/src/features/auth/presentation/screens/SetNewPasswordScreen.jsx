@@ -1,5 +1,3 @@
-// src/features/auth/presentation/screens/SetNewPasswordScreen.jsx
-
 import React from "react";
 import { useResetPassword } from "../../hooks/useResetPassword";
 import Button from "../../../../core/ui_components/Button";
@@ -22,7 +20,7 @@ const SetNewPasswordScreen = () => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 text-xs font-bold rounded-2xl border border-red-100 text-center">
+          <div className="mb-6 p-4 bg-red-50 text-red-600 text-xs font-bold rounded-2xl border border-red-100 text-center animate-shake leading-relaxed">
             ⚠️ {error}
           </div>
         )}
@@ -51,7 +49,7 @@ const SetNewPasswordScreen = () => {
             type="submit"
             isLoading={isLoading}
             fullWidth
-            className="py-4 mt-4 shadow-lg shadow-primary/20 font-bold"
+            className="py-4 mt-4 shadow-lg shadow-primary/20 font-bold tracking-wider"
           >
             Update Password
           </Button>

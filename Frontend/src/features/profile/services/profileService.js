@@ -18,6 +18,10 @@ export const profileService = {
     formData.append("PhoneNumber", profileData.phoneNumber || "");
     formData.append("Bio", profileData.bio || "");
     formData.append("Location", profileData.location || "");
+    
+    if (profileData.dateOfBirth) {
+      formData.append("DateOfBirth", profileData.dateOfBirth);
+    }
 
     if (profilePictureFile) {
       // إرسال الملف الخام تحت مسمى ProfilePictureUrl

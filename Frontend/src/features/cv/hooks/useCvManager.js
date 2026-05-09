@@ -16,7 +16,13 @@ export const useCvManager = () => {
   const fetchMyCvs = async () => {
     try {
       const response = await cvService.getMyCvs();
-      setCvList(response.data?.data || response.data || []);
+      const list = response.data?.data || response.data || [];
+      // 💡 توحيد المعرفات لضمان عمل الاختيار بشكل صحيح عبر مختلف استجابات الباك إند
+      const normalizedList = list.map(cv => ({
+        ...cv,
+        id: cv.id || cv.cvId || cv.CvId || cv.cvID
+      }));
+      setCvList(normalizedList);
     } catch (error) {
       console.error("Error fetching CVs", error);
     }

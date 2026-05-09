@@ -3,6 +3,7 @@ import React, { useRef, useState } from "react";
 import { useCvManager } from "../../hooks/useCvManager";
 import Button from "../../../../core/ui_components/Button";
 import GenerateResumeModal from "../components/GenerateResumeModal";
+import CompareResultModal from "../components/CompareResultModal";
 
 const CvManagerScreen = () => {
   const {
@@ -34,6 +35,12 @@ const CvManagerScreen = () => {
       <GenerateResumeModal
         isOpen={isGenerateModalOpen}
         onClose={() => setIsGenerateModalOpen(false)}
+      />
+
+      <CompareResultModal
+        isOpen={!!compareResult}
+        result={compareResult}
+        onClose={closeCompareResult}
       />
 
       {/* Hero Section */}

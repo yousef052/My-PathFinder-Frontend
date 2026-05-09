@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useCourseCategory } from "../../hooks/useCourseCategory";
-import { useProfile } from "../../../profile/hooks/useProfile";
 import Button from "../../../../core/ui_components/Button";
+import { useAuth } from "../../../../core/context/AuthContext";
 
 const CategoriesManagerScreen = () => {
   const {
@@ -20,8 +20,7 @@ const CategoriesManagerScreen = () => {
     importJsonCategories,
   } = useCourseCategory();
 
-  const { user } = useProfile();
-  const isAdmin = user?.role === "Admin" || user?.Role === "Admin";
+  const { isAdmin } = useAuth();
 
   // حالة لتتبع التصنيف الرئيسي المحدد حالياً لعرض تصنيفاته الفرعية
   const [selectedCategory, setSelectedCategory] = useState(null);

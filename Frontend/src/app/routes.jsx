@@ -1,7 +1,6 @@
-// src/app/routes.jsx
-
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../core/context/AuthContext";
 
 import DashboardLayout from "../core/ui_components/Layout/DashboardLayout.jsx";
 import LoginScreen from "../features/auth/presentation/screens/LoginScreen.jsx";
@@ -21,33 +20,58 @@ import PlatformManagerScreen from "../features/courses/presentation/screens/Plat
 import MyLearningScreen from "../features/courses/presentation/screens/MyLearningScreen.jsx";
 import MyJobApplicationsScreen from "../features/jobs/presentation/screens/MyJobApplicationsScreen.jsx";
 import JobSourcesManagerScreen from "../features/jobs/presentation/screens/JobSourcesManagerScreen.jsx";
-import SavedJobsScreen from "../features/jobs/presentation/screens/SavedJobsScreen.jsx";
+import SavedScreen from "../features/dashboard/presentation/screens/SavedScreen.jsx";
 import CareerMatchScreen from "../features/careerMatch/presentation/screens/CareerMatchScreen.jsx";
-
-// 💡 استيراد شاشة مسارات المستخدم والتعريف الجديدة
 import MyCareerPathsScreen from "../features/careerPath/presentation/screens/MyCareerPathsScreen.jsx";
-import OnboardingScreen from "../features/auth/presentation/screens/OnboardingScreen.jsx"; // التحديث هنا
+import CareerPathDetailsScreen from "../features/careerPath/presentation/screens/CareerPathDetailsScreen.jsx";
+import OnboardingScreen from "../features/auth/presentation/screens/OnboardingScreen.jsx";
+import AdminLayout from "../features/admin/presentation/components/AdminLayout.jsx";
+import CareerPathsManager from "../features/admin/presentation/screens/CareerPathsManager.jsx";
+import CategoriesManager from "../features/admin/presentation/screens/CategoriesManager.jsx";
+import CoursesManager from "../features/admin/presentation/screens/CoursesManager.jsx";
+import PlatformsManager from "../features/admin/presentation/screens/PlatformsManager.jsx";
+import JobSourcesManager from "../features/admin/presentation/screens/JobSourcesManager.jsx";
+import GlobalSkillsManager from "../features/admin/presentation/screens/GlobalSkillsManager.jsx";
+import AdminProfileManager from "../features/admin/presentation/screens/AdminProfileManager.jsx";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/login" replace />;
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 };
 
 const PublicRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  if (token) return <Navigate to="/dashboard" replace />;
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
   return children;
 };
 
+const AdminRoute = ({ children }) => {
+  const { isAdmin } = useAuth();
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
+const AdminComingSoon = ({ title }) => (
+  <div className="rounded-[2rem] border border-slate-200 bg-white p-10">
+    <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#5b7cfa]">
+      Admin Module
+    </p>
+    <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
+      {title}
+    </h1>
+    <p className="mt-3 max-w-2xl text-sm font-medium text-slate-500">
+      This module route is reserved for the next implementation step.
+    </p>
+  </div>
+);
+
 const AppRoutes = () => {
-  // 💡 التحقق من إتمام التعريف
   const hasCompletedOnboarding =
-    localStorage.getItem("hasCompletedOnboarding") === "true"; // التحديث هنا[cite: 18]
+    localStorage.getItem("hasCompletedOnboarding") === "true";
 
   return (
     <Routes>
-      {/* 💡 توجيه المستخدم بناءً على حالة التعريف */}
       <Route
         path="/"
         element={
@@ -56,9 +80,7 @@ const AppRoutes = () => {
             replace
           />
         }
-      />{" "}
-      {/* التحديث هنا[cite: 18] */}
-      {/* 💡 مسار شاشة التعريف الجديد */}
+      />
       <Route
         path="/onboarding"
         element={
@@ -66,8 +88,7 @@ const AppRoutes = () => {
             <OnboardingScreen />
           </PublicRoute>
         }
-      />{" "}
-      {/* التحديث هنا[cite: 18] */}
+      />
       <Route
         path="/login"
         element={
@@ -101,6 +122,14 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/verify-otp"
+        element={
+          <PublicRoute>
+            <VerificationScreen />
+          </PublicRoute>
+        }
+      />
+      <Route
         path="/set-new-password"
         element={
           <PublicRoute>
@@ -119,6 +148,25 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/admin/career-paths" replace />} />
+        <Route path="career-paths" element={<CareerPathsManager />} />
+        <Route path="categories" element={<CategoriesManager />} />
+        <Route path="courses" element={<CoursesManager />} />
+        <Route path="platforms" element={<PlatformsManager />} />
+        <Route path="job-sources" element={<JobSourcesManager />} />
+        <Route path="skills" element={<GlobalSkillsManager />} />
+        <Route path="profile" element={<AdminProfileManager />} />
+      </Route>
+      <Route
         path="/career-paths"
         element={
           <ProtectedRoute>
@@ -128,7 +176,16 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      {/* 💡 مسار مسارات المستخدم الملتحق بها */}
+      <Route
+        path="/career-paths/:id"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <CareerPathDetailsScreen />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/my-career-paths"
         element={
@@ -170,25 +227,26 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/categories-manager"
+        path="/saved"
         element={
           <ProtectedRoute>
             <DashboardLayout>
-              <CategoriesManagerScreen />
+              <SavedScreen />
             </DashboardLayout>
           </ProtectedRoute>
         }
       />
       <Route
-        path="/platform-manager"
+        path="/saved/:tab"
         element={
           <ProtectedRoute>
             <DashboardLayout>
-              <PlatformManagerScreen />
+              <SavedScreen />
             </DashboardLayout>
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/jobs"
         element={
@@ -199,16 +257,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/saved-jobs"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <SavedJobsScreen />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
+
       <Route
         path="/my-applications"
         element={
@@ -219,16 +268,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/job-sources-manager"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <JobSourcesManagerScreen />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
+
       <Route
         path="/profile"
         element={

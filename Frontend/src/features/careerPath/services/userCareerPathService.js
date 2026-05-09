@@ -50,7 +50,13 @@ export const userCareerPathService = {
 
   // جلب المسارات الموصى بها (بناءً على التقييم المهني)
   getRecommended: async () => {
-    const response = await apiClient.get("/UserCareerPath/recommended");
-    return response.data;
+    try {
+      const response = await apiClient.get("/UserCareerPath/recommended");
+      return response.data;
+    } catch (err) {
+      // 💡 Swagger shows GET, but if it returns 400, it's likely a profile state issue
+      console.warn("Recommended paths not available yet.", err.response?.status);
+      return [];
+    }
   },
 };

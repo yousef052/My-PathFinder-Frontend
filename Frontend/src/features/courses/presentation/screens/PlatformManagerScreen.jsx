@@ -1,8 +1,9 @@
 // src/features/courses/presentation/screens/PlatformManagerScreen.jsx
 import React, { useEffect, useState } from "react";
 import { useCoursePlatform } from "../../hooks/useCoursePlatform";
-import { useProfile } from "../../../profile/hooks/useProfile";
 import Button from "../../../../core/ui_components/Button";
+import { useAuth } from "../../../../core/context/AuthContext";
+import { resolveMediaUrl } from "../../../../core/utils/mediaUrl";
 
 const PlatformManagerScreen = () => {
   const {
@@ -13,8 +14,7 @@ const PlatformManagerScreen = () => {
     addPlatform,
     deletePlatform,
   } = useCoursePlatform();
-  const { user } = useProfile();
-  const isAdmin = user?.role === "Admin" || user?.Role === "Admin";
+  const { isAdmin } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -114,9 +114,9 @@ const PlatformManagerScreen = () => {
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm group-hover:rotate-6 transition-transform">
-                    {p.logoUrl ? (
+                    {resolveMediaUrl(p.logoUrl) ? (
                       <img
-                        src={p.logoUrl}
+                        src={resolveMediaUrl(p.logoUrl)}
                         className="w-6 h-6 object-contain"
                         alt=""
                       />

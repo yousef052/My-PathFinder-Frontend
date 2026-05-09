@@ -9,33 +9,32 @@ export const useSavedJobs = () => {
 
   const fetchSavedJobs = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const data = await savedJobService.getSavedJobs();
-      setSavedJobs(Array.isArray(data) ? data : data?.data || []);
+      setSavedJobs(data?.data || data || []);
     } catch (err) {
-      setError("فشل في جلب الوظائف المحفوظة.");
+      setError("Failed to fetch saved jobs");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const toggleSaveJob = async (
-    jobId,
-    isCurrentlySaved,
-    savedRecordId = null,
-  ) => {
+  const toggleSaveJob = async (jobId, savedRecordId = null) => {
     try {
-      if (isCurrentlySaved) {
+      if (savedRecordId) {
         await savedJobService.unsaveJob(savedRecordId);
-        setSavedJobs((prev) => prev.filter((job) => job.id !== savedRecordId));
-        return { action: "unsaved", success: true };
+        setSavedJobs((prev) => prev.filter((item) => (item.id || item.savedJobId) !== savedRecordId));
+        return { saved: false };
       } else {
         const response = await savedJobService.saveJob(jobId);
-        await fetchSavedJobs(); // تحديث القائمة
-        return { action: "saved", success: true, data: response };
+        await fetchSavedJobs();
+        return { saved: true, data: response };
       }
     } catch (err) {
-      return { success: false, error: err.message };
+      console.error("Error toggling job save state:", err);
+      return { error: err };
     }
   };
 

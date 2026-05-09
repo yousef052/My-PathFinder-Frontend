@@ -2,18 +2,23 @@
 import React, { useEffect, useState } from "react";
 import { useCareerMatch } from "../../hooks/useCareerMatch";
 import Button from "../../../../core/ui_components/Button";
+import { useNavigate } from "react-router-dom";
 
 const CareerMatchScreen = () => {
+  const navigate = useNavigate();
   const {
     questionnaire,
     matchResult,
     isLoading,
+    isEnrolling,
     error,
     fetchQuestionnaire,
     submitQuestionnaire,
+    enrollInPath,
   } = useCareerMatch();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [enrolled, setEnrolled] = useState(false);
 
   useEffect(() => {
     fetchQuestionnaire();
@@ -27,6 +32,29 @@ const CareerMatchScreen = () => {
     setAnswers(newAnswers);
   };
 
+  const handleEnroll = async () => {
+    // Check all possible ID fields for the recommended path
+    const pathId = 
+      matchResult?.careerPathId || 
+      matchResult?.id || 
+      matchResult?.recommendedPathId || 
+      matchResult?.pathId ||
+      matchResult?.careerPath?.id;
+      
+    if (pathId) {
+      const success = await enrollInPath(pathId);
+      if (success) {
+        setEnrolled(true);
+        // Wait a bit to show success state then navigate
+        setTimeout(() => navigate("/my-career-paths"), 1500);
+      }
+    } else {
+      console.error("No valid path ID found in match result", matchResult);
+      // Fallback: if we can't enroll, just go to catalog
+      navigate("/career-paths");
+    }
+  };
+
   const questions = questionnaire?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
   const qId = currentQuestion?.id || currentQuestion?.questionId;
@@ -37,49 +65,85 @@ const CareerMatchScreen = () => {
       : 0;
 
   if (matchResult) {
+    const pathName = matchResult.careerPathName || matchResult.name || "Recommended Path";
+    
+    // Clean up recommendation text (remove any Arabic fallbacks)
+    let displayRecommendation = matchResult.recommendation || matchResult.resultText || matchResult.description;
+    if (!displayRecommendation || /[\u0600-\u06FF]/.test(displayRecommendation)) {
+       displayRecommendation = "This path perfectly aligns with your skills and professional aspirations based on our AI analysis.";
+    }
+
     return (
-      <div className="max-w-3xl mx-auto p-12 bg-white rounded-[3rem] border border-white text-center shadow-2xl shadow-blue-100 animate-fade-in">
+      <div className="max-w-3xl mx-auto p-12 bg-white rounded-[4rem] border border-white text-center shadow-2xl shadow-blue-100 animate-fade-in">
         <div className="w-24 h-24 bg-blue-50 text-[#5b7cfa] rounded-full flex items-center justify-center mx-auto mb-8 text-5xl shadow-inner">
-          🎯
+          {enrolled ? "✅" : "🎯"}
         </div>
-        <h2 className="text-3xl font-black text-gray-900 mb-4">
-          Perfect Match Found!
+        
+        <h2 className="text-3xl font-black text-slate-900 mb-2">
+          {enrolled ? "Successfully Enrolled!" : "Perfect Match Found!"}
         </h2>
-        <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-gray-50 mb-10 italic text-lg text-gray-700 font-bold leading-relaxed shadow-inner">
-          {matchResult.recommendation ||
-            matchResult.resultText ||
-            "إليك المسار المقترح بناءً على إجاباتك."}
+        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.25em] mb-10">
+          {enrolled ? "Preparing your learning journey..." : "AI Generated Recommendation"}
+        </p>
+
+        <div className="premium-card p-10 bg-slate-50 border-slate-100 mb-10 shadow-inner group">
+          <h4 className="text-primary font-black text-[10px] uppercase tracking-widest mb-4">Recommended Career</h4>
+          <div className="text-3xl font-black text-slate-950 mb-4 group-hover:scale-105 transition-transform duration-500">
+            {pathName}
+          </div>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            {displayRecommendation}
+          </p>
         </div>
-        <Button
-          onClick={() => window.location.reload()}
-          className="px-12 rounded-full"
-        >
-          Start Over
-        </Button>
+
+        {error && (
+          <div className="bg-red-50 text-red-500 p-4 rounded-2xl text-xs font-bold mb-6">
+            {error}
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {!enrolled ? (
+            <Button
+              onClick={handleEnroll}
+              isLoading={isEnrolling}
+              className="px-16 h-16 rounded-2xl text-sm shadow-primary/20"
+            >
+              Enroll & Start Learning 🚀
+            </Button>
+          ) : (
+            <Button
+              onClick={() => navigate("/my-career-paths")}
+              className="px-16 h-16 rounded-2xl text-sm shadow-emerald-200"
+            >
+              Go to My Paths
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-fade-in pb-10">
-      <div className="bg-white p-10 md:p-14 rounded-[3rem] border border-white shadow-xl shadow-blue-50">
-        <div className="flex justify-between items-center mb-8 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+    <div className="max-w-3xl mx-auto space-y-8 animate-fade-in-up pb-10">
+      <div className="bg-white p-12 md:p-16 rounded-[4rem] border border-white shadow-xl shadow-blue-50">
+        <div className="flex justify-between items-center mb-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
           <span>
             Question {currentQuestionIndex + 1} / {questions.length}
           </span>
-          <span className="text-[#5b7cfa] font-black">
-            {progress}% Completed
+          <span className="text-primary font-black">
+            {progress}% Complete
           </span>
         </div>
-        <div className="w-full bg-slate-100 h-2.5 rounded-full mb-12 overflow-hidden">
+        <div className="w-full bg-slate-100 h-2 rounded-full mb-12 overflow-hidden">
           <div
-            className="bg-[#5b7cfa] h-full transition-all duration-1000 ease-out rounded-full"
+            className="bg-primary h-full transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(91,124,250,0.5)]"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
         {currentQuestion && (
           <div className="animate-fade-in">
-            <h3 className="text-2xl md:text-3xl font-black text-gray-800 mb-10 leading-tight tracking-tight">
+            <h3 className="text-2xl md:text-4xl font-black text-slate-900 mb-12 leading-tight tracking-tight italic">
               {currentQuestion.text || currentQuestion.questionText}
             </h3>
             <div className="space-y-4">
@@ -88,7 +152,7 @@ const CareerMatchScreen = () => {
                   <button
                     key={idx}
                     onClick={() => handleAnswerSelect(qId, opt)}
-                    className={`w-full p-6 rounded-2xl border-2 text-left font-bold transition-all duration-300 ${currentAnswer === opt ? "border-[#5b7cfa] bg-blue-50/50 text-[#5b7cfa] shadow-md" : "border-slate-50 bg-slate-50/50 hover:border-blue-100 text-gray-600"}`}
+                    className={`w-full p-8 rounded-3xl border-2 text-left font-bold transition-all duration-500 ${currentAnswer === opt ? "border-primary bg-primary/5 text-primary shadow-lg shadow-blue-100/50 -translate-y-1" : "border-slate-50 bg-slate-50/50 hover:border-blue-100 text-slate-600 hover:bg-white"}`}
                   >
                     {opt}
                   </button>
@@ -96,20 +160,20 @@ const CareerMatchScreen = () => {
               ) : (
                 <textarea
                   autoFocus
-                  className="w-full p-8 bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:border-blue-100 focus:bg-white text-sm font-bold min-h-[180px] transition-all shadow-inner"
-                  placeholder="Type your answer here..."
+                  className="w-full p-8 bg-slate-50 border-2 border-transparent rounded-[2.5rem] outline-none focus:border-primary focus:bg-white text-sm font-bold min-h-[200px] transition-all shadow-inner"
+                  placeholder="Share your thoughts..."
                   value={currentAnswer}
                   onChange={(e) => handleAnswerSelect(qId, e.target.value)}
                 />
               )}
             </div>
-            <div className="mt-14 flex justify-between items-center border-t border-slate-50 pt-10">
+            <div className="mt-16 flex justify-between items-center border-t border-slate-50 pt-12">
               <button
                 disabled={currentQuestionIndex === 0}
                 onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
-                className={`text-[10px] font-black uppercase tracking-widest ${currentQuestionIndex === 0 ? "opacity-0" : "text-gray-400 hover:text-[#5b7cfa]"}`}
+                className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentQuestionIndex === 0 ? "opacity-0 pointer-events-none" : "text-slate-400 hover:text-primary"}`}
               >
-                ← Previous
+                ← Back
               </button>
               <Button
                 onClick={
@@ -119,11 +183,11 @@ const CareerMatchScreen = () => {
                 }
                 disabled={!currentAnswer.trim() || isLoading}
                 isLoading={isLoading}
-                className="px-12 rounded-full"
+                className="px-16 h-16 rounded-2xl text-[10px] uppercase tracking-widest font-black"
               >
                 {currentQuestionIndex === questions.length - 1
-                  ? "Analyze Results 🚀"
-                  : "Continue"}
+                  ? "Generate Blueprint 🚀"
+                  : "Next Step"}
               </Button>
             </div>
           </div>
@@ -132,4 +196,5 @@ const CareerMatchScreen = () => {
     </div>
   );
 };
+
 export default CareerMatchScreen;

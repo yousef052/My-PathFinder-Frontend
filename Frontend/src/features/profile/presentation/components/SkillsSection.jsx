@@ -4,7 +4,7 @@ import { useSkills } from "../../hooks/useSkills";
 import Button from "../../../../core/ui_components/Button";
 
 const SkillsSection = () => {
-  const { mySkills, globalSkills, isLoading, handleAddMySkill, isSubmitting } =
+  const { mySkills, globalSkills, isLoading, handleAddMySkill, handleRemoveMySkill, isSubmitting } =
     useSkills();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newSkillName, setNewSkillName] = useState("");
@@ -14,7 +14,6 @@ const SkillsSection = () => {
     const trimmedName = newSkillName.trim();
     if (!trimmedName) return;
 
-    // 💡 منطق المطابقة الذكية: إزالة المسافات وتجاهل حالة الأحرف
     const normalize = (str) => (str || "").replace(/\s+/g, "").toLowerCase();
 
     const matchedSkill = globalSkills.find(
@@ -28,7 +27,6 @@ const SkillsSection = () => {
       return;
     }
 
-    // إرسال الـ ID الفعلي الذي وجدناه في قاعدة البيانات[cite: 36]
     const success = await handleAddMySkill({
       skillId: matchedSkill.id || matchedSkill.skillId,
       skillName: matchedSkill.name || matchedSkill.skillName,
@@ -52,8 +50,7 @@ const SkillsSection = () => {
           onClick={() => setShowAddForm(!showAddForm)}
           className={`w-10 h-10 rounded-full font-black text-xl transition-all shadow-sm z-10 ${showAddForm ? "bg-red-50 text-red-400 rotate-45" : "bg-blue-50 text-[#5b7cfa]"}`}
         >
-          {" "}
-          {showAddForm ? "✕" : "+"}{" "}
+          {showAddForm ? "✕" : "+"}
         </button>
       </div>
 
@@ -91,9 +88,16 @@ const SkillsSection = () => {
             mySkills.map((skill, idx) => (
               <div
                 key={skill.userSkillId || skill.id || idx}
-                className="bg-slate-50 hover:bg-[#5b7cfa]/5 text-gray-700 px-5 py-2.5 rounded-2xl text-xs font-black border border-gray-100 transition-all uppercase tracking-widest"
+                className="group/tag relative bg-slate-50 hover:bg-[#5b7cfa]/5 text-gray-700 px-5 py-2.5 rounded-2xl text-xs font-black border border-gray-100 transition-all uppercase tracking-widest flex items-center gap-2"
               >
                 {skill.skillName || skill.name}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveMySkill(skill.userSkillId || skill.id)}
+                  className="w-4 h-4 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-[8px] hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover/tag:opacity-100"
+                >
+                  ✕
+                </button>
               </div>
             ))
           ) : (

@@ -12,6 +12,8 @@ export const useVerifyOtp = () => {
   const [successMsg, setSuccessMsg] = useState(null);
   const navigate = useNavigate();
 
+  const isResetFlow = sessionStorage.getItem("is_password_reset") === "true";
+
   const handleChange = (element, index) => {
     if (isNaN(element.value)) return false;
     const newOtp = [...otp];
@@ -36,15 +38,15 @@ export const useVerifyOtp = () => {
     setSuccessMsg(null);
 
     const email = sessionStorage.getItem("pending_email");
-    const isResetFlow = sessionStorage.getItem("is_password_reset") === "true";
 
     try {
       if (isResetFlow) {
-        // 💡 في حالة الـ Reset، نخزن الكود ونتوجه للشاشة التالية مباشرة بدون مناداة السيرفر هنا
+        // 💡 العودة للمنطق المطابق للـ Swagger:
+        // لا يوجد API للتحقق هنا، لذا نحفظ الكود وننتقل فوراً لشاشة الباسورد الجديد
         sessionStorage.setItem("reset_token", code);
         navigate("/set-new-password");
       } else {
-        // في حالة تأكيد الإيميل العادي
+        // في حالة تسجيل حساب جديد (التأكيد العادي)
         await authService.confirmEmail({ email, otp: code });
         sessionStorage.removeItem("pending_email");
         navigate("/login");
@@ -68,7 +70,11 @@ export const useVerifyOtp = () => {
     setSuccessMsg(null);
 
     try {
-      await authService.resendOtp(email);
+      if (isResetFlow) {
+        await authService.forgotPassword({ email });
+      } else {
+        await authService.resendOtp(email);
+      }
       setSuccessMsg("تم إعادة إرسال الكود بنجاح.");
     } catch (err) {
       setError("فشل في إعادة الإرسال، حاول لاحقاً.");

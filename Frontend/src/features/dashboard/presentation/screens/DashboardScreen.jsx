@@ -6,7 +6,7 @@ import { useCourseProgress } from "../../../courses/hooks/useCourseProgress";
 import { useSkills } from "../../../profile/hooks/useSkills";
 import { Link } from "react-router-dom";
 import CourseCard from "../../../courses/presentation/components/CourseCard";
-import Button from "../../../../core/ui_components/Button"; //[cite: 20]
+import Button from "../../../../core/ui_components/Button";
 
 const DashboardScreen = () => {
   const { user, isLoading: isProfileLoading } = useProfile();
@@ -19,9 +19,19 @@ const DashboardScreen = () => {
   const { mySkills } = useSkills();
 
   useEffect(() => {
-    fetchRecommendations();
     if (fetchMyProgress) fetchMyProgress();
-  }, [fetchRecommendations, fetchMyProgress]);
+  }, [fetchMyProgress]);
+
+  useEffect(() => {
+    const targetTitle =
+      user?.targetJobTitle ||
+      user?.TargetJobTitle ||
+      user?.desiredJobTitle ||
+      user?.jobTitle ||
+      "";
+
+    fetchRecommendations(targetTitle);
+  }, [fetchRecommendations, user]);
 
   if (isProfileLoading)
     return (
@@ -33,125 +43,147 @@ const DashboardScreen = () => {
       </div>
     );
 
-  return (
-    <div className="space-y-12 pb-20">
-      {/* 💡 إحصائيات حقيقية قوية[cite: 20] */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-50 shadow-sm hover:shadow-xl transition-all group">
-          <p className="text-3xl font-black text-text-primary group-hover:text-primary transition-colors">
-            {userProgress?.length || 0}
-          </p>
-          <p className="text-[10px] text-text-hint font-black uppercase tracking-widest mt-1">
-            Active Courses
-          </p>
-        </div>
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-50 shadow-sm hover:shadow-xl transition-all group">
-          <p className="text-3xl font-black text-primary group-hover:rotate-6 transition-transform">
-            {mySkills?.length || 0}
-          </p>
-          <p className="text-[10px] text-text-hint font-black uppercase tracking-widest mt-1">
-            Acquired Skills
-          </p>
-        </div>
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-50 shadow-sm hover:shadow-xl transition-all group">
-          <p className="text-3xl font-black text-emerald-500 group-hover:scale-110 transition-transform">
-            {recommendations?.length || 0}
-          </p>
-          <p className="text-[10px] text-text-hint font-black uppercase tracking-widest mt-1">
-            AI Matches
-          </p>
-        </div>
-      </div>
+  const isProfileIncomplete = !user?.firstName || !user?.lastName;
+  const greetingName = user?.firstName || user?.userName || "Explorer";
 
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-[#4a6cf7] to-primary-dark rounded-[3.5rem] p-12 text-white shadow-2xl animate-float">
-        <div className="relative z-10 space-y-6">
-          <h2 className="text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-            Welcome back, <br className="md:hidden" />
-            <span className="text-primary-50 italic">
-              {user?.firstName || "Explorer"}
-            </span>
-            ! 👋
-          </h2>
-          <p className="text-primary-50 font-medium max-w-lg leading-relaxed opacity-90 text-sm">
-            {userProgress?.length > 0
-              ? `You are making great progress in ${userProgress.length} tracks. Ready for more?`
-              : "Discover personalized paths designed to accelerate your software engineering career."}
-          </p>
-          <div className="pt-4">
-            <Link to="/career-paths">
-              <button className="bg-white text-primary px-10 py-4 rounded-2xl font-black text-xs hover:shadow-2xl hover:scale-105 transition-all active:scale-95 uppercase tracking-widest shadow-xl">
-                Continue Learning
-              </button>
-            </Link>
+  return (
+    <div className="space-y-12 pb-24 animate-fade-in-up">
+      {/* Premium Hero Section */}
+      <div className="relative overflow-hidden bg-slate-950 rounded-[4rem] p-12 lg:p-20 text-white shadow-2xl group border border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#5b7cfa]/20 via-transparent to-transparent opacity-60"></div>
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#5b7cfa]/10 rounded-full blur-[100px]"></div>
+        
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-16">
+          <div className="space-y-10 max-w-2xl text-center lg:text-left">
+            <div className="inline-flex px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[#5b7cfa] text-[9px] font-black uppercase tracking-[0.3em] backdrop-blur-md">
+              Evolutionary Path Active ⚡
+            </div>
+            <h2 className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1] italic">
+              Empower Your <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5b7cfa] to-blue-400">Future, {greetingName}</span>
+            </h2>
+            <p className="text-slate-400 font-medium leading-relaxed opacity-90 text-xl max-w-lg">
+              {userProgress?.length > 0
+                ? `You're currently mastering ${userProgress.length} tracks. Consistency is the key to professional excellence.`
+                : "Your professional transformation starts here. Explore curated paths or take the AI match test."}
+            </p>
+            <div className="flex flex-wrap gap-5 justify-center lg:justify-start pt-4">
+              <Link to="/career-paths">
+                <button className="bg-[#5b7cfa] hover:bg-blue-600 text-white px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-blue-500/20 transition-all hover:scale-105 active:scale-95">
+                  Browse Paths ↗
+                </button>
+              </Link>
+              <Link to="/career-match">
+                <button className="px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-white/10 hover:bg-white/5 transition-all text-white backdrop-blur-sm">
+                  Retake AI Test
+                </button>
+              </Link>
+            </div>
+          </div>
+          
+          <div className="w-full lg:w-80 aspect-square bg-gradient-to-br from-white/5 to-transparent rounded-[3.5rem] border border-white/10 flex items-center justify-center relative group-hover:rotate-3 transition-transform duration-1000">
+             <div className="absolute inset-0 bg-[#5b7cfa]/20 blur-[80px] rounded-full opacity-50"></div>
+             <div className="text-9xl group-hover:scale-110 transition-transform duration-700 select-none">🚀</div>
           </div>
         </div>
-        <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-[80px] animate-pulse"></div>
       </div>
 
-      <div className="space-y-8">
-        <div className="flex justify-between items-end px-4">
-          <h3 className="font-black text-text-primary text-2xl tracking-tight italic">
-            Recommended For You
-          </h3>
-          <Link
-            to="/courses"
-            className="text-primary font-black text-xs uppercase tracking-widest hover:translate-x-2 transition-transform"
-          >
-            View Catalog →
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {isRecLoading ? (
-            [1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-72 bg-gray-50 rounded-[3rem] animate-pulse"
-              ></div>
-            ))
-          ) : recommendations?.length > 0 ? (
-            recommendations.slice(0, 3).map((course) => (
-              <div
-                key={course.id || course.courseId}
-                className="transition-all duration-500 hover:scale-[1.05] hover:-translate-y-2"
-              >
-                <CourseCard course={course} />
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border-2 border-dashed border-gray-100">
-              <p className="text-text-hint font-black uppercase text-[10px] tracking-widest italic">
-                Update your skills to unlock AI recommendations
+      {/* Modernized Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="premium-card p-12 bg-white border-slate-100/50 group relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
+          <div className="relative z-10 flex justify-between items-center">
+            <div>
+              <p className="text-5xl font-black text-slate-900 mb-2">
+                {userProgress?.length || 0}
+              </p>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
+                Active Learning Tracks
               </p>
             </div>
-          )}
+            <div className="w-16 h-16 bg-blue-50 text-[#5b7cfa] rounded-2xl flex items-center justify-center text-3xl shadow-inner rotate-3 group-hover:rotate-12 transition-transform">
+              📚
+            </div>
+          </div>
+        </div>
+        
+        <div className="premium-card p-12 bg-white border-slate-100/50 group relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
+          <div className="relative z-10 flex justify-between items-center">
+            <div>
+              <p className="text-5xl font-black text-[#5b7cfa] mb-2">
+                {mySkills?.length || 0}
+              </p>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
+                Verified Proficiencies
+              </p>
+            </div>
+            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-3xl shadow-inner -rotate-3 group-hover:rotate-0 transition-transform">
+              ⚡
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="bg-text-primary p-12 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden group">
-        <div className="absolute inset-0 bg-primary/10 translate-x-full group-hover:translate-x-0 transition-transform duration-1000 ease-in-out"></div>
-        <div className="relative z-10">
-          <h4 className="text-2xl font-black mb-4 italic text-primary-light">
-            Growth Tip 💡
-          </h4>
-          <p className="text-text-hint font-medium leading-relaxed mb-8 max-w-xl">
-            With{" "}
-            <span className="text-white font-black">
-              {mySkills?.length || 0} skills
-            </span>{" "}
-            already verified, you are ahead of 60% of peers. Explore advanced
-            backend paths to boost your score further.
-          </p>
-          <Link to="/profile">
-            <Button
-              variant="outline"
-              className="border-gray-700 text-white hover:bg-white hover:text-text-primary px-10 py-4 text-[10px] uppercase font-black tracking-widest"
-            >
-              Improve My Profile
-            </Button>
-          </Link>
+      {/* Action Hub */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm">
+             <div className="flex justify-between items-center mb-10">
+                <h3 className="text-xl font-black text-slate-900 italic">Quick Access</h3>
+                <span className="w-2 h-2 bg-[#5b7cfa] rounded-full animate-ping"></span>
+             </div>
+             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                {[
+                  { icon: "📄", label: "My CV", link: "/profile/cv" },
+                  { icon: "💼", label: "Jobs", link: "/jobs" },
+                  { icon: "🔖", label: "Library", link: "/saved" },
+                  { icon: "⚙️", label: "Settings", link: "/profile" }
+                ].map((item, idx) => (
+                  <Link key={idx} to={item.link} className="flex flex-col items-center gap-4 group p-6 rounded-[2rem] hover:bg-slate-50 transition-all">
+                    <span className="text-3xl group-hover:scale-125 transition-transform">{item.icon}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-900">{item.label}</span>
+                  </Link>
+                ))}
+             </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-[#5b7cfa] to-blue-700 rounded-[3.5rem] p-10 text-white flex flex-col justify-center relative overflow-hidden shadow-2xl shadow-blue-200">
+           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+           <h4 className="text-2xl font-black mb-4 italic leading-tight">Master New <br/>Horizons</h4>
+           <p className="text-blue-100/80 text-xs font-medium mb-8 leading-relaxed">Continue your journey with the latest industry-standard courses.</p>
+           <Link to="/courses">
+              <button className="bg-white text-[#5b7cfa] w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all active:scale-95">
+                Explore Courses
+              </button>
+           </Link>
         </div>
       </div>
+
+      {/* Profile Reminder or Analysis State */}
+      {(isProfileIncomplete || (!recommendations.length)) && (
+        <div className="bg-white p-10 rounded-[3.5rem] border border-amber-100 flex flex-col md:flex-row justify-between items-center gap-8 shadow-xl shadow-amber-500/5">
+          <div className="flex items-center gap-6 text-center md:text-left">
+            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-3xl">🏗️</div>
+            <div>
+              <h3 className="font-black text-slate-900 text-lg italic">
+                {(!recommendations.length) ? "Profile Under Analysis" : "Complete Your Foundation"}
+              </h3>
+              <p className="text-slate-400 text-xs font-medium mt-1">
+                {(!recommendations.length) 
+                  ? "Our AI is currently analyzing your background. Add more details to unlock tailored career matching." 
+                  : "Provide more details to unlock tailored career matching."}
+              </p>
+            </div>
+          </div>
+          <Link to="/profile">
+            <button className="bg-amber-500 text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200">
+              Update Profile
+            </button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

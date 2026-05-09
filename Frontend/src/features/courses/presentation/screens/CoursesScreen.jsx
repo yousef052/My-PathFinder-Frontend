@@ -2,20 +2,21 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCourses } from "../../hooks/useCourses";
-import { useProfile } from "../../../profile/hooks/useProfile";
 import { useCourseProgress } from "../../hooks/useCourseProgress";
 import CourseCard from "../components/CourseCard";
 import Button from "../../../../core/ui_components/Button";
 import AddCourseModal from "./AddCourseModal";
+import { useAuth } from "../../../../core/context/AuthContext";
 
 const CoursesScreen = () => {
-  // 💡 دمج الهوكس لجلب البيانات العامة والشخصية[cite: 26]
   const {
     courses,
     isLoading: isCoursesLoading,
     fetchCourses,
     addCourse,
+    enrollInCourse, // 💡 استدعاء دالة التسجيل من الـ Hook
   } = useCourses();
+
   const {
     userProgress,
     isLoading: isProgressLoading,
@@ -23,14 +24,13 @@ const CoursesScreen = () => {
     updateCourseProgress,
     dropCourse,
   } = useCourseProgress();
-  const { user } = useProfile();
+
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState("all"); // 'all' or 'learning'
+  const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  const isAdmin = user?.role === "Admin" || user?.Role === "Admin";
 
   useEffect(() => {
     fetchCourses();
@@ -44,10 +44,21 @@ const CoursesScreen = () => {
     await updateCourseProgress(pId, 1, "Completed lesson from dashboard");
   };
 
+  // 💡 دالة تنفيذ التسجيل وتحديث البروجرس في نفس اللحظة
+  const handleEnrollment = async (courseId) => {
+    const success = await enrollInCourse(courseId);
+    if (success) {
+      await fetchMyProgress(); // تحديث تبويب My Learning فوراً
+      alert("تم التسجيل بنجاح! راجع صفحة My Learning.");
+      return true;
+    }
+    return false;
+  };
+
   return (
     <div className="space-y-10 animate-fade-in pb-20">
-      {/* 💡 نظام التبويبات (Tabs) للدمج الذكي */}
-      <div className="flex gap-4 p-2 bg-white rounded-3xl border border-gray-100 shadow-sm w-fit">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
+        <div className="flex gap-4 p-2 bg-white rounded-3xl border border-gray-100 shadow-sm w-fit">
         <button
           onClick={() => setActiveTab("all")}
           className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "all" ? "bg-[#5b7cfa] text-white shadow-lg shadow-blue-100" : "text-gray-400 hover:bg-slate-50"}`}
@@ -60,12 +71,17 @@ const CoursesScreen = () => {
         >
           <span>🎓</span> My Learning
         </button>
+        </div>
+        <button 
+          onClick={() => navigate("/saved/courses")}
+          className="px-8 py-4 rounded-2xl bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary hover:shadow-lg transition-all flex items-center gap-2 shadow-sm"
+        >
+          <span>🔖</span> View Saved Courses
+        </button>
       </div>
 
-      {/* المحتوى بناءً على التبويب النشط */}
       {activeTab === "all" ? (
         <>
-          {/* Search & Actions Bar[cite: 26] */}
           <div className="bg-white p-8 rounded-[3rem] border border-white shadow-xl shadow-blue-50/50 flex flex-col lg:flex-row justify-between items-center gap-6">
             <div className="flex-1 w-full relative group">
               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-xl group-focus-within:scale-110 transition-transform">
@@ -85,7 +101,7 @@ const CoursesScreen = () => {
             {isAdmin && (
               <div className="flex items-center gap-3 w-full lg:w-auto">
                 <Button
-                  onClick={() => navigate("/categories-manager")}
+                  onClick={() => navigate("/admin/categories")}
                   variant="outline"
                   className="px-8 border-indigo-100 text-indigo-500"
                 >
@@ -108,13 +124,16 @@ const CoursesScreen = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
               {courses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onEnroll={handleEnrollment} // 💡 تمرير الدالة للبطاقة
+                />
               ))}
             </div>
           )}
         </>
       ) : (
-        /* تبويب دروسي (My Learning) */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {isProgressLoading ? (
             <div className="col-span-full text-center py-20 animate-pulse text-xs font-black uppercase text-gray-300">

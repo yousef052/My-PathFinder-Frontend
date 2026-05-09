@@ -25,14 +25,30 @@ export const useCareerPath = () => {
     }
   }, []);
 
+  // جلب مسار محدد
+  const fetchCareerPathById = useCallback(async (id) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await careerPathService.getById(id);
+      setCurrentPath(data);
+      return data;
+    } catch (err) {
+      setError(err.response?.data?.message || "فشل في جلب تفاصيل المسار.");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // إضافة مسار جديد
   const addCareerPath = async (newData) => {
     setIsLoading(true);
     setError(null);
     try {
       await careerPathService.create(newData);
-      await fetchCareerPaths(); // تحديث القائمة بعد الإضافة
-      return true; // إرجاع true للـ Component ليعرف أن العملية نجحت
+      await fetchCareerPaths();
+      return true;
     } catch (err) {
       setError(err.response?.data?.message || "فشل في إضافة المسار المهني.");
       return false;
@@ -47,7 +63,7 @@ export const useCareerPath = () => {
     setError(null);
     try {
       await careerPathService.update(id, updatedData);
-      await fetchCareerPaths(); // تحديث القائمة
+      await fetchCareerPaths();
       return true;
     } catch (err) {
       setError(err.response?.data?.message || "فشل في تحديث المسار المهني.");
@@ -63,7 +79,6 @@ export const useCareerPath = () => {
     setError(null);
     try {
       await careerPathService.delete(id);
-      // إزالة العنصر من الـ State مباشرة لتحديث الواجهة بسرعة بدون إعادة طلب من السيرفر
       setCareerPaths((prev) => prev.filter((path) => path.id !== id));
       return true;
     } catch (err) {
@@ -80,6 +95,7 @@ export const useCareerPath = () => {
     isLoading,
     error,
     fetchCareerPaths,
+    fetchCareerPathById,
     addCareerPath,
     updateCareerPath,
     deleteCareerPath,

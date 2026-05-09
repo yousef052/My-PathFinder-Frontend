@@ -5,6 +5,12 @@ import { apiClient } from "../../../core/network/apiClient";
 export const jobService = {
   // جلب الوظائف مع الفلاتر (SearchTerm, Location, JobType, ...)
   getAll: async (filters = {}) => {
+    const searchTerm = filters.SearchTerm || filters.name;
+    if (searchTerm) {
+      // Endpoint /jobs/search currently only supports ?name= query
+      const response = await apiClient.get("/jobs/search", { params: { name: searchTerm } });
+      return response.data;
+    }
     const response = await apiClient.get("/jobs", { params: filters });
     return response.data;
   },
@@ -35,7 +41,12 @@ export const jobService = {
 
   // جلب الوظائف المقترحة بالذكاء الاصطناعي
   getRecommended: async () => {
-    const response = await apiClient.get("/jobs/recommended");
-    return response.data;
+    try {
+      const response = await apiClient.get("/jobs/recommended");
+      return response.data;
+    } catch (err) {
+      console.warn("Recommended jobs not available yet.", err.response?.status);
+      return [];
+    }
   },
 };

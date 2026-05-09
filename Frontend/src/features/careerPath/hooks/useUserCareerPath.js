@@ -28,8 +28,8 @@ export const useUserCareerPath = () => {
     try {
       const data = await userCareerPathService.getRecommended();
       setRecommendedPaths(Array.isArray(data) ? data : data?.data || []);
-    } catch (err) {
-      setError("لم نتمكن من جلب التوصيات. تأكد من إتمام التقييم المهني.");
+    } catch {
+      setRecommendedPaths([]);
     } finally {
       setIsLoading(false);
     }

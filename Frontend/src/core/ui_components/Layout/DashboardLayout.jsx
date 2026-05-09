@@ -1,13 +1,16 @@
 // src/core/ui_components/Layout/DashboardLayout.jsx
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { useProfile } from "../../../features/profile/hooks/useProfile";
+import { clearProfileCache } from "../../../features/profile/hooks/useProfile";
 import { useNotifications } from "../../../features/notifications/hooks/useNotifications";
 
 const DashboardLayout = ({ children }) => {
   const { user } = useProfile();
   const { notifications, unreadCount, markAsRead, isLoading } =
     useNotifications();
+  const { isAdmin, userRole, refreshAuthState } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false); //
@@ -19,12 +22,19 @@ const DashboardLayout = ({ children }) => {
     { name: "My Paths", path: "/my-career-paths", icon: "🛤️" },
     { name: "Courses", path: "/courses", icon: "📚" },
     { name: "Jobs", path: "/jobs", icon: "💼" },
+    { name: "Saved", path: "/saved", icon: "🔖" },
     { name: "CV Manager", path: "/cv-manager", icon: "📄" },
     { name: "AI Assistant", path: "/ai-assistant", icon: "🤖" },
   ];
 
+  const adminNavItems = [
+    { name: "Admin Console", path: "/admin" },
+  ];
+
   const handleLogout = () => {
+    clearProfileCache();
     localStorage.clear();
+    refreshAuthState();
     navigate("/login");
   };
 
@@ -94,6 +104,16 @@ const DashboardLayout = ({ children }) => {
                 {item.name}
               </Link>
             ))}
+            {isAdmin &&
+              adminNavItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 hover:scale-110 ${location.pathname.includes(item.path) ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-text-hint hover:text-primary"}`}
+                >
+                  {item.name}
+                </Link>
+              ))}
           </nav>
         </div>
 
@@ -121,7 +141,7 @@ const DashboardLayout = ({ children }) => {
                 {user ? `${user.firstName} ${user.lastName}` : "..."}
               </p>
               <p className="text-[8px] text-text-hint font-black uppercase tracking-widest mt-1">
-                Professional Account
+                {isAdmin ? "Admin Account" : `${userRole || "User"} Account`}
               </p>
             </div>
           </Link>

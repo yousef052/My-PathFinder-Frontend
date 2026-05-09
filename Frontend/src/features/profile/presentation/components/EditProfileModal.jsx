@@ -9,7 +9,7 @@ const EditProfileModal = ({
   currentUser,
   onUpdateSuccess,
 }) => {
-  const { updateProfile, isUpdating } = useProfile();
+  const { updateProfile, isUpdating } = useProfile({ autoFetch: false });
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -17,12 +17,18 @@ const EditProfileModal = ({
     phoneNumber: "",
     bio: "",
     location: "",
-    email: "",
+    dateOfBirth: "",
   });
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    if (currentUser)
+    if (currentUser) {
+      // تحويل التاريخ لصيغة YYYY-MM-DD ليتناسب مع input type="date"
+      let formattedDate = "";
+      if (currentUser.dateOfBirth) {
+        formattedDate = new Date(currentUser.dateOfBirth).toISOString().split('T')[0];
+      }
+
       setFormData({
         firstName: currentUser.firstName || "",
         lastName: currentUser.lastName || "",
@@ -30,16 +36,15 @@ const EditProfileModal = ({
         phoneNumber: currentUser.phoneNumber || "",
         bio: currentUser.bio || "",
         location: currentUser.location || "",
-        email: currentUser.email || "",
+        dateOfBirth: formattedDate,
       });
+    }
   }, [currentUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // تنفيذ التحديث[cite: 37, 46]
     const success = await updateProfile(formData, selectedImage);
     if (success) {
-      // 💡 استدعاء دالة التحديث في الشاشة الأب لضمان ظهور البيانات الجديدة فوراً[cite: 46]
       if (onUpdateSuccess) onUpdateSuccess();
       onClose();
     }
@@ -89,27 +94,28 @@ const EditProfileModal = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
-                "firstName",
-                "lastName",
-                "userName",
-                "phoneNumber",
-                "location",
-                "email",
+                { name: "firstName", label: "First Name", type: "text" },
+                { name: "lastName", label: "Last Name", type: "text" },
+                { name: "userName", label: "User Name", type: "text" },
+                { name: "phoneNumber", label: "Phone Number", type: "tel" },
+                { name: "location", label: "Location", type: "text" },
+                { name: "dateOfBirth", label: "Date of Birth", type: "date" },
               ].map((field) => (
-                <div key={field} className="space-y-2">
+                <div key={field.name} className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">
-                    {field.replace(/([A-Z])/g, " $1")}
+                    {field.label}
                   </label>
                   <input
-                    type={field === "email" ? "email" : "text"}
-                    value={formData[field]}
+                    type={field.type}
+                    value={formData[field.name] || ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, [field]: e.target.value })
+                      setFormData({ ...formData, [field.name]: e.target.value })
                     }
                     className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-50 transition-all font-bold text-sm shadow-sm"
                   />
                 </div>
               ))}
+              
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">
                   Bio Description
@@ -120,9 +126,11 @@ const EditProfileModal = ({
                     setFormData({ ...formData, bio: e.target.value })
                   }
                   className="w-full p-6 bg-slate-50 rounded-[2rem] h-32 resize-none outline-none text-sm font-medium shadow-sm"
+                  placeholder="Tell us about yourself..."
                 />
               </div>
             </div>
+
             <Button
               type="submit"
               isLoading={isUpdating}
