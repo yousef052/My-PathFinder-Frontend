@@ -13,7 +13,8 @@ const CourseCard = ({ course, onEnroll, isSaved: initialIsSaved, savedId: initia
 
   const rawPic = course?.thumbnailUrl || course?.ThumbnailUrl;
   const finalThumbnail = resolveMediaUrl(rawPic);
-  const isFree = course?.price === 0 || course?.price === null;
+  const price = course?.price ?? course?.Price;
+  const isFree = price === 0 || price === null;
 
   const handleEnrollClick = async (e) => {
     if (e) e.stopPropagation();
@@ -56,7 +57,7 @@ const CourseCard = ({ course, onEnroll, isSaved: initialIsSaved, savedId: initia
 
         <div className="absolute top-4 right-4 z-10">
           <span className="bg-white/95 backdrop-blur-xl px-5 py-2.5 text-[11px] font-black rounded-2xl text-primary shadow-xl border border-white/40">
-            {isFree ? "COMPLIMENTARY" : `$${course?.price}`}
+            {isFree ? "FREE" : `$${price}`}
           </span>
         </div>
 
@@ -77,9 +78,9 @@ const CourseCard = ({ course, onEnroll, isSaved: initialIsSaved, savedId: initia
         </button>
 
         <div className="absolute bottom-4 left-4 flex gap-2">
-          {course?.difficultyLevel && (
+          {(course?.difficultyLevel || course?.DifficultyLevel) && (
             <span className="bg-neutral-900/80 backdrop-blur-xl px-4 py-2 text-[10px] font-black rounded-xl text-white uppercase tracking-widest z-10 shadow-2xl">
-              {course.difficultyLevel}
+              {course.difficultyLevel || course.DifficultyLevel}
             </span>
           )}
         </div>
@@ -87,9 +88,9 @@ const CourseCard = ({ course, onEnroll, isSaved: initialIsSaved, savedId: initia
 
       <div className="p-8 flex-1 flex flex-col bg-white">
         <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary-dark opacity-60">
-          <span>{course?.instructor || "Professional Mentor"}</span>
+          <span>{course?.instructor || course?.Instructor || "Instructor"}</span>
           <span className="h-1 w-1 rounded-full bg-slate-300"></span>
-          <span>Curated Path</span>
+          <span>Course</span>
         </div>
         
         <h3 className="font-black text-2xl text-slate-900 mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-primary transition-colors">
@@ -102,10 +103,10 @@ const CourseCard = ({ course, onEnroll, isSaved: initialIsSaved, savedId: initia
 
         <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest border-t border-slate-100 pt-6">
           <div className="flex items-center gap-2.5 bg-primary-lightest/50 px-4 py-2 rounded-2xl text-primary">
-            <span className="text-lg opacity-80">⏱️</span> {course?.durationHours || 12}H
+            <span className="text-lg opacity-80">⏱️</span> {course?.durationHours || course?.DurationHours || 12}H
           </div>
           <div className="flex items-center gap-2.5 bg-warning/10 px-4 py-2 rounded-2xl text-warning-dark">
-            <span className="text-lg">⭐</span> {course?.rating ? Number(course.rating).toFixed(1) : "4.9"}
+            <span className="text-lg">⭐</span> {course?.rating || course?.Rating ? Number(course.rating || course.Rating).toFixed(1) : "4.9"}
           </div>
         </div>
       </div>
@@ -118,7 +119,7 @@ const CourseCard = ({ course, onEnroll, isSaved: initialIsSaved, savedId: initia
           className="shadow-primary hover:shadow-2xl transition-all !py-5 !rounded-[1.5rem]"
           variant="primary"
         >
-          Enroll in Path 🚀
+          Enroll Now 🚀
         </Button>
       </div>
     </div>

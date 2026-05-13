@@ -65,20 +65,6 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
-const AdminComingSoon = ({ title }) => (
-  <div className="rounded-[2rem] border border-slate-200 bg-white p-10">
-    <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[var(--color-primary)]">
-      Admin Module
-    </p>
-    <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
-      {title}
-    </h1>
-    <p className="mt-3 max-w-2xl text-sm font-medium text-slate-500">
-      This module route is reserved for the next implementation step.
-    </p>
-  </div>
-);
-
 const AppRoutes = () => {
   const hasCompletedOnboarding =
     localStorage.getItem("hasCompletedOnboarding") === "true";
@@ -261,7 +247,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/jobs"
         element={
@@ -272,7 +257,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/my-applications"
         element={
@@ -283,7 +267,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/profile"
         element={

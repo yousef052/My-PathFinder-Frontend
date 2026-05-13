@@ -28,18 +28,20 @@ export const useAdminCareerPaths = () => {
   const [isCoursesLoading, setIsCoursesLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const stats = useMemo(
-    () => ({
-      total: careerPaths.length,
-      beginner: careerPaths.filter(
-        (path) => path.difficultyLevel?.toLowerCase() === "beginner",
-      ).length,
-      advanced: careerPaths.filter(
-        (path) => path.difficultyLevel?.toLowerCase() === "advanced",
-      ).length,
-    }),
-    [careerPaths],
-  );
+  const stats = useMemo(() => {
+    const total = careerPaths.length;
+    const count = (level) =>
+      careerPaths.filter(
+        (p) => (p.difficultyLevel || p.DifficultyLevel || "").toLowerCase() === level,
+      ).length;
+
+    return {
+      total,
+      beginner: count("beginner"),
+      intermediate: count("intermediate"),
+      advanced: count("advanced"),
+    };
+  }, [careerPaths]);
 
   const fetchCareerPaths = useCallback(async (searchTerm = "") => {
     setIsLoading(true);

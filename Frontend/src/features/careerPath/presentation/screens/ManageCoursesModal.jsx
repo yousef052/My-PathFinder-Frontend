@@ -1,6 +1,7 @@
 // src/features/careerPath/presentation/screens/ManageCoursesModal.jsx
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useCareerPathCourse } from "../../hooks/useCareerPathCourse";
 import Button from "../../../../core/ui_components/Button";
 
@@ -82,8 +83,8 @@ const ManageCoursesModal = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fade-in flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50 shrink-0">
@@ -246,7 +247,8 @@ const ManageCoursesModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

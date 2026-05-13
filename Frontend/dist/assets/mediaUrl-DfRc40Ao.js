@@ -1,0 +1,1 @@
+var e=`https://pathfinder.tryasp.net`,t=t=>{if(typeof t!=`string`)return null;let n=t.trim();return!n||n.toLowerCase().startsWith(`string`)||n.toLowerCase()===`null`||n.toLowerCase()===`undefined`?null:/^https?:\/\//i.test(n)?n:`${e}${n.startsWith(`/`)?n:`/${n}`}`};export{t};

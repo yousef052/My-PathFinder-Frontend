@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useProfile } from "../../../profile/hooks/useProfile";
+import UserFlowFooter from "../../../../core/ui_components/UserFlowFooter";
 import { useCourseRecommendation } from "../../../courses/hooks/useCourseRecommendation";
 import { useCourseProgress } from "../../../courses/hooks/useCourseProgress";
 import { useSkills } from "../../../profile/hooks/useSkills";
@@ -29,11 +30,11 @@ const DashboardScreen = () => {
   const { mySkills } = useSkills();
 
   useEffect(() => {
-    if (fetchMyProgress) fetchMyProgress(); document.documentElement.style.setProperty("--theme-color", "#4763e1"); document.documentElement.style.setProperty("--bg-orb-1", "#4763e1"); document.documentElement.style.setProperty("--bg-orb-2", "var(--color-secondary)"); document.documentElement.style.setProperty("--bg-orb-3", "#1e293b"); document.documentElement.style.setProperty("--bg-gradient-start", "#0f172a"); document.documentElement.style.setProperty("--bg-gradient-end", "#020617");
+    if (fetchMyProgress) fetchMyProgress();
   }, [fetchMyProgress]);
 
   useEffect(() => {
-    const targetTitle = user?.targetJobTitle || user?.jobTitle || "";
+    const targetTitle = user?.targetJobTitle || user?.TargetJobTitle || user?.jobTitle || user?.JobTitle || "";
     fetchRecommendations(targetTitle);
   }, [fetchRecommendations, user]);
 
@@ -41,19 +42,19 @@ const DashboardScreen = () => {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-6 animate-fade-in">
         <div className="h-24 w-24 animate-spin rounded-full border-[8px] border-primary border-t-transparent shadow-2xl" />
-        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-primary animate-pulse">Syncing Trajectory...</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-primary animate-pulse">Loading Dashboard...</p>
       </div>
     );
   }
 
-  const greetingName = user?.firstName || user?.userName || "Explorer";
+  const greetingName = user?.firstName || user?.FirstName || user?.userName || user?.UserName || "User";
 
   // Journey Intelligence: Decide the next mission
   const getNextMission = () => {
-    if (!mySkills || mySkills.length === 0) return { title: "Establish Identity", task: "Analyze CV to extract your skill matrix", link: "/cv-manager", icon: "📄", color: "bg-cv" };
-    if (!user?.targetJobTitle) return { title: "Define Objective", task: "Take the AI Career Discovery to map your path", link: "/career-match", icon: "🎯", color: "bg-primary" };
-    if (userProgress && userProgress.length > 0) return { title: "Maintain Momentum", task: "Continue your active learning tracks", link: "/courses", icon: "📚", color: "bg-success" };
-    return { title: "Explore Markets", task: "Discover job opportunities for your profile", link: "/jobs", icon: "💼", color: "bg-secondary" };
+    if (!mySkills || mySkills.length === 0) return { title: "Upload Resume", task: "Upload your CV to get started", link: "/cv-manager", icon: "📄", color: "bg-cv" };
+    if (!(user?.targetJobTitle || user?.TargetJobTitle)) return { title: "Find Career Path", task: "Use our AI to find the best path for you", link: "/career-match", icon: "🎯", color: "bg-primary" };
+    if (userProgress && userProgress.length > 0) return { title: "Keep Learning", task: "Finish your enrolled courses", link: "/courses", icon: "📚", color: "bg-success" };
+    return { title: "Browse Jobs", task: "Find jobs that match your skills", link: "/jobs", icon: "💼", color: "bg-secondary" };
   };
 
   const mission = getNextMission();
@@ -72,7 +73,7 @@ const DashboardScreen = () => {
                  <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-xl shadow-xl">👋</div>
                  <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Status: Active</p>
               </div>
-              <h2 className="text-6xl md:text-8xl font-black text-slate-950 tracking-tighter leading-[0.8] uppercase italic">
+              <h2 className="text-4xl md:text-8xl font-black text-slate-950 tracking-tighter leading-[0.9] md:leading-[0.8] uppercase italic">
                 Ready for the <br />
                 next <span className="text-primary not-italic">leap,</span> <br />
                 <span className="text-slate-400">{greetingName}?</span>
@@ -80,11 +81,11 @@ const DashboardScreen = () => {
               <div className="flex flex-wrap gap-4 pt-4">
                  <div className="px-6 py-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
                     <span className="text-primary font-black"><StatCounter end={userProgress?.length || 0} /></span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tracks Active</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Active Courses</span>
                  </div>
                  <div className="px-6 py-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
                     <span className="text-secondary font-black"><StatCounter end={mySkills?.length || 0} /></span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Verified Skills</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Skills</span>
                  </div>
               </div>
            </div>
@@ -99,12 +100,12 @@ const DashboardScreen = () => {
                  <div className="rounded-full bg-primary/10 px-4 py-1 text-[8px] font-black uppercase tracking-widest text-primary">Next Phase</div>
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-black italic text-slate-950 leading-tight">Establish Identity</h3>
-                <p className="text-xs font-medium leading-relaxed text-slate-500">Analyze CV to extract your skill matrix and professional DNA.</p>
+                <h3 className="text-xl font-black italic text-slate-950 leading-tight">Upload Resume</h3>
+                <p className="text-xs font-medium leading-relaxed text-slate-500">Upload your CV to get started.</p>
               </div>
             </div>
             <Link to="/cv-manager" className="group mt-8 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-              Initiate Sequence <span className="transition-transform group-hover:translate-x-2">→</span>
+              Get Started <span className="transition-transform group-hover:translate-x-2">→</span>
             </Link>
           </div>
         </div>
@@ -154,12 +155,13 @@ const DashboardScreen = () => {
                   <h4 className="text-lg font-black text-slate-900 leading-tight mb-4">{rec.title}</h4>
                   <div className="flex items-center gap-2">
                      <div className="h-1.5 w-1.5 bg-success rounded-full" />
-                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">High Match</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recommended</span>
                   </div>
                </div>
             ))}
          </div>
       </div>
+      <UserFlowFooter currentPath="/dashboard" />
     </div>
   );
 };

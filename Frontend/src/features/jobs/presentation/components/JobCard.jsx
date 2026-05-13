@@ -53,7 +53,7 @@ const JobCard = ({ job, isAdmin, onDelete, onApply, isSaved: initialIsSaved, sav
     <div className="bg-white/80 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white shadow-glass hover:shadow-2xl hover:bg-white transition-all duration-700 flex flex-col h-full group relative hover:-translate-y-2">
       <div className="flex justify-between items-start mb-6">
         <div className="flex-1 pr-10">
-          <div className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-primary mb-3">Active Signal</div>
+          <div className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-primary mb-3">New Posting</div>
           <h3 className="font-black text-xl text-slate-900 italic tracking-tight line-clamp-2 leading-tight" title={job?.jobTitle || job?.title}>
             {job?.jobTitle || job?.title || "Untitled Position"}
           </h3>
@@ -110,11 +110,11 @@ const JobCard = ({ job, isAdmin, onDelete, onApply, isSaved: initialIsSaved, sav
 
       <div className="mt-auto flex justify-between items-center border-t border-slate-100 pt-6">
         <div className="flex flex-col">
-          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1">Stipend / Value</p>
+          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1">Salary Range</p>
           <div className="text-xs font-black text-slate-900">
             {job?.salaryMin && job?.salaryMax
               ? `$${job.salaryMin.toLocaleString()} — $${job.salaryMax.toLocaleString()}`
-              : "Competitive Yield"}
+              : "Negotiable"}
           </div>
         </div>
 
@@ -123,7 +123,7 @@ const JobCard = ({ job, isAdmin, onDelete, onApply, isSaved: initialIsSaved, sav
           onClick={handleApplyClick}
           disabled={isApplying}
         >
-          {isApplying ? "Engaging..." : job.externalUrl ? "External ↗" : "Integrate"}
+          {isApplying ? "Applying..." : job.externalUrl ? "External ↗" : "Apply Now"}
         </button>
       </div>
     </div>

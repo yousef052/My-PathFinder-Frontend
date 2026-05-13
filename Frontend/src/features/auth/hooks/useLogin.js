@@ -5,7 +5,7 @@ import { authService } from "../services/authService";
 import { clearProfileCache } from "../../profile/hooks/useProfile";
 
 export const useLogin = () => {
-  const [formData, setFormData] = useState({ Email: "", Password: "" });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -44,11 +44,19 @@ export const useLogin = () => {
         setError("خطأ في قراءة بيانات الدخول من الخادم.");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          err.response?.data ||
-          "بيانات الدخول غير صحيحة.",
-      );
+      const errorData = err.response?.data;
+      let msg = "بيانات الدخول غير صحيحة.";
+      
+      if (typeof errorData === "string") msg = errorData;
+      else if (errorData?.message) msg = errorData.message;
+      else if (errorData?.title) msg = errorData.title; 
+      else if (errorData?.errors) {
+        const firstError = Object.values(errorData.errors)[0];
+        if (Array.isArray(firstError)) msg = firstError[0];
+        else if (typeof firstError === "string") msg = firstError;
+      }
+      
+      setError(msg);
     } finally {
       setIsLoading(false);
     }

@@ -23,7 +23,7 @@ export const adminService = {
       ),
     delete: async (id) =>
       unwrap(
-        await apiClient.delete(endpoint(`/CareerPath/deletecareerPath/${id}`)),
+        await apiClient.delete(endpoint(`/CareerPath/${id}`)),
       ),
   },
 
@@ -47,39 +47,85 @@ export const adminService = {
       unwrap(await apiClient.get(endpoint("/Course/search"), { params })),
     getById: async (id) => unwrap(await apiClient.get(endpoint(`/Course/${id}`))),
     create: async (payload) => {
-      // Swagger: POST /api/Course/add (multipart)
+      // API: POST /api/Course/add (multipart)
+      if (payload instanceof FormData) {
+        return unwrap(
+          await apiClient.post(endpoint("/Course/add"), payload, {
+            headers: { "Content-Type": "multipart/form-data" },
+          }),
+        );
+      }
+
       const fd = new FormData();
+      const mapping = {
+        courseName: "Name",
+        description: "Description",
+        instructor: "Instructor",
+        courseUrl: "ExternalUrl",
+        price: "Price",
+        durationHours: "DurationHours",
+        totalLessons: "TotalLessons",
+        difficultyLevel: "DifficultyLevel",
+        rating: "Rating",
+        categoryId: "CategoryId",
+        platformId: "PlatformId",
+        subCategoryId: "SubCategoryId",
+        thumbnailFile: "ThumbnailFile"
+      };
+
       Object.keys(payload).forEach((key) => {
-        // Convert to PascalCase for .NET backend if needed, 
-        // but here we follow Swagger attribute names
-        const swaggerKey = key.charAt(0).toUpperCase() + key.slice(1);
+        const swaggerKey = mapping[key] || key.charAt(0).toUpperCase() + key.slice(1);
         if (payload[key] !== undefined && payload[key] !== null) {
           fd.append(swaggerKey, payload[key]);
         }
       });
       return unwrap(
-        await apiClient.post(endpoint("/Course/add new course"), fd, {
+        await apiClient.post(endpoint("/Course/add"), fd, {
           headers: { "Content-Type": "multipart/form-data" },
         }),
       );
     },
     update: async (id, payload) => {
-      // Swagger: PUT /api/Course/update/{id} (multipart)
+      // API: PUT /api/Course/update/{id} (multipart)
+      if (payload instanceof FormData) {
+        return unwrap(
+          await apiClient.put(endpoint(`/Course/update/${id}`), payload, {
+            headers: { "Content-Type": "multipart/form-data" },
+          }),
+        );
+      }
+
       const fd = new FormData();
+      const mapping = {
+        courseName: "Name",
+        description: "Description",
+        instructor: "Instructor",
+        courseUrl: "ExternalUrl",
+        price: "Price",
+        durationHours: "DurationHours",
+        totalLessons: "TotalLessons",
+        difficultyLevel: "DifficultyLevel",
+        rating: "Rating",
+        categoryId: "CategoryId",
+        platformId: "PlatformId",
+        subCategoryId: "SubCategoryId",
+        thumbnailFile: "ThumbnailFile"
+      };
+
       Object.keys(payload).forEach((key) => {
-        const swaggerKey = key.charAt(0).toUpperCase() + key.slice(1);
+        const swaggerKey = mapping[key] || key.charAt(0).toUpperCase() + key.slice(1);
         if (payload[key] !== undefined && payload[key] !== null) {
           fd.append(swaggerKey, payload[key]);
         }
       });
       return unwrap(
-        await apiClient.put(endpoint(`/Course/update-course/${id}`), fd, {
+        await apiClient.put(endpoint(`/Course/update/${id}`), fd, {
           headers: { "Content-Type": "multipart/form-data" },
         }),
       );
     },
     delete: async (id) =>
-      unwrap(await apiClient.delete(endpoint(`/Course/delete-course/${id}`))),
+      unwrap(await apiClient.delete(endpoint(`/Course/delete/${id}`))),
   },
 
   categories: {

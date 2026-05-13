@@ -26,7 +26,9 @@ const AdminProfileManager = () => {
 
   if (isLoading) return <SkeletonProfile />;
 
-  const displayName = user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.userName || "Admin User";
+  const displayName = (user?.firstName || user?.FirstName) && (user?.lastName || user?.LastName) 
+    ? `${user.firstName || user.FirstName} ${user.lastName || user.LastName}` 
+    : user?.userName || user?.UserName || "Admin User";
   const profilePic = resolveMediaUrl(user?.profilePictureUrl || user?.ProfilePictureUrl);
 
   return (
@@ -108,26 +110,26 @@ const AdminProfileManager = () => {
                   <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Username
                   </p>
-                  <p className="text-sm font-black text-slate-700">@{user?.userName}</p>
+                  <p className="text-sm font-black text-slate-700">@{user?.userName || user?.UserName}</p>
                 </div>
                 <div>
                   <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Phone Number
                   </p>
-                  <p className="text-sm font-black text-slate-700">{user?.phoneNumber || "Not provided"}</p>
+                  <p className="text-sm font-black text-slate-700">{user?.phoneNumber || user?.PhoneNumber || "Not provided"}</p>
                 </div>
                 <div>
                   <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Location
                   </p>
-                  <p className="text-sm font-black text-slate-700">{user?.location || "Not provided"}</p>
+                  <p className="text-sm font-black text-slate-700">{user?.location || user?.Location || "Not provided"}</p>
                 </div>
                 <div className="md:col-span-2">
                   <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Bio / Status
                   </p>
                   <p className="text-sm font-medium leading-relaxed italic text-slate-500">
-                    {user?.bio || "No administrative bio provided yet."}
+                    {user?.bio || user?.Bio || "No administrative bio provided yet."}
                   </p>
                 </div>
               </div>

@@ -94,7 +94,7 @@ const MyLearningScreen = () => {
         <div className="flex flex-col items-center justify-between gap-6 rounded-[3.5rem] border border-slate-100 bg-white p-10 shadow-sm md:flex-row lg:p-12">
           <div className="text-center md:text-left">
             <h2 className="text-3xl font-black italic tracking-tight text-slate-950">
-              My Learning Journey
+              My Enrolled Courses
             </h2>
             <p className="mt-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
               Track your professional growth
@@ -129,7 +129,7 @@ const MyLearningScreen = () => {
                Enroll in a course from the catalog to start tracking your progress here.
             </p>
             <Link to="/courses" className="mt-10">
-              <PrimaryBtn>Browse Catalog</PrimaryBtn>
+              <PrimaryBtn>Browse Courses</PrimaryBtn>
             </Link>
           </div>
         ) : (

@@ -3,14 +3,14 @@ import { NavLink, Outlet, Link } from "react-router-dom";
 import { useAuth } from "../../../../core/context/AuthContext";
 
 const navItems = [
-  { label: "Career Paths", path: "/admin/career-paths", marker: "CP" },
-  { label: "Courses", path: "/admin/courses", marker: "CO" },
-  { label: "Categories", path: "/admin/categories", marker: "CA" },
-  { label: "Platforms", path: "/admin/platforms", marker: "PL" },
-  { label: "Jobs", path: "/admin/jobs", marker: "JB" },
-  { label: "Job Sources", path: "/admin/job-sources", marker: "JS" },
-  { label: "Global Skills", path: "/admin/skills", marker: "SK" },
-  { label: "My Profile", path: "/admin/profile", marker: "PR" },
+  { label: "Career Paths", path: "/admin/career-paths", icon: "🚀" },
+  { label: "Courses", path: "/admin/courses", icon: "🎓" },
+  { label: "Categories", path: "/admin/categories", icon: "📂" },
+  { label: "Platforms", path: "/admin/platforms", icon: "🏢" },
+  { label: "Jobs", path: "/admin/jobs", icon: "💼" },
+  { label: "Job Sources", path: "/admin/job-sources", icon: "📡" },
+  { label: "Global Skills", path: "/admin/skills", icon: "🎯" },
+  { label: "My Profile", path: "/admin/profile", icon: "👤" },
 ];
 
 const AdminLayout = () => {
@@ -43,8 +43,8 @@ const AdminLayout = () => {
                 }`
               }
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 text-[10px] font-black">
-                {item.marker}
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 text-lg">
+                {item.icon}
               </span>
               <span>{item.label}</span>
             </NavLink>

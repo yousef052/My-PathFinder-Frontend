@@ -1,6 +1,5 @@
-// src/features/jobs/presentation/screens/AddJobModal.jsx
-
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Button from "../../../../core/ui_components/Button";
 import { useJobSources } from "../../hooks/useJobSources";
 
@@ -64,8 +63,8 @@ const AddJobModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
 
   const inputCls = "w-full p-2.5 bg-slate-50 rounded-xl outline-none border border-gray-200 text-sm font-bold focus:border-[var(--color-primary)] focus:bg-white transition";
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
           <h2 className="text-xl font-black text-gray-800">Add New Job</h2>
@@ -157,7 +156,8 @@ const AddJobModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
           <Button type="submit" form="job-form" isLoading={isLoading} className="flex-1 shadow-lg shadow-primary/20">Post Job</Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

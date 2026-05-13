@@ -1,6 +1,7 @@
 // src/features/careerPath/presentation/screens/CareerPathModal.jsx
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 // استخدم زرار الـ Button الخاص بك أو أي زرار عادي لو المسار مختلف
 import Button from "../../../../core/ui_components/Button";
 
@@ -46,8 +47,8 @@ const CareerPathModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-fade-in">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50">
           <h2 className="text-xl font-black text-gray-800">
@@ -170,7 +171,8 @@ const CareerPathModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

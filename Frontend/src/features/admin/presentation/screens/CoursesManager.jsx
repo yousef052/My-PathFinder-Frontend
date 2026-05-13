@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAdminCourses } from "../../hooks/useAdminCourses";
 import { useAdminPlatforms } from "../../hooks/useAdminPlatforms";
 import { useAdminCareerPaths } from "../../hooks/useAdminCareerPaths";
@@ -88,13 +89,23 @@ const CourseCard = ({ course, platforms, categories, onEdit, onDelete, isSaving,
             {platformName}
           </span>
           <span className="rounded-lg border border-slate-100 bg-slate-50 px-2 py-1 text-[9px] font-bold text-slate-500">
-            {categoryName}
+            {categoryName} {course.subCategoryName || course.SubCategoryName ? `> ${course.subCategoryName || course.SubCategoryName}` : ""}
           </span>
         </div>
 
         <p className="mt-4 text-xs font-medium leading-relaxed text-slate-500 line-clamp-2">
           {course.description || course.Description || "No description provided for this course."}
         </p>
+
+        <div className="mt-4 space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Instructor: <span className="text-slate-700">{course.instructor || course.Instructor || "N/A"}</span>
+          </p>
+          <div className="flex gap-4 text-[10px] font-bold text-slate-400">
+            <span className="flex items-center gap-1">⏱️ {course.durationHours || course.DurationHours || 0}h</span>
+            <span className="flex items-center gap-1">📖 {course.totalLessons || course.TotalLessons || 0} Lessons</span>
+          </div>
+        </div>
 
         <div className="mt-auto pt-6 flex items-center justify-between">
           <p className="text-lg font-black text-[var(--color-primary)]">
@@ -225,8 +236,8 @@ const CourseModal = ({ isOpen, title, initialValue, isSaving, onClose, onSubmit,
     if (success) onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
       <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative w-full max-w-2xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl" style={{ animation: "slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
@@ -332,7 +343,8 @@ const CourseModal = ({ isOpen, title, initialValue, isSaving, onClose, onSubmit,
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -405,10 +417,28 @@ const CoursesManager = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <div className="flex flex-col justify-center rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md" style={{ animation: "fadeSlideUp 0.4s ease both" }}>
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Courses</p>
             <p className="mt-1 text-3xl font-black text-slate-900">{courses.length}</p>
+          </div>
+          <div className="flex flex-col justify-center rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md" style={{ animation: "fadeSlideUp 0.4s ease both 40ms" }}>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Beginner</p>
+            <p className="mt-1 text-3xl font-black text-emerald-600">
+              {courses.filter(c => (c.difficultyLevel || c.DifficultyLevel || "").toLowerCase() === 'beginner').length}
+            </p>
+          </div>
+          <div className="flex flex-col justify-center rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md" style={{ animation: "fadeSlideUp 0.4s ease both 80ms" }}>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Intermediate</p>
+            <p className="mt-1 text-3xl font-black text-amber-500">
+              {courses.filter(c => (c.difficultyLevel || c.DifficultyLevel || "").toLowerCase() === 'intermediate').length}
+            </p>
+          </div>
+          <div className="flex flex-col justify-center rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md" style={{ animation: "fadeSlideUp 0.4s ease both 120ms" }}>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Advanced</p>
+            <p className="mt-1 text-3xl font-black text-red-500">
+              {courses.filter(c => (c.difficultyLevel || c.DifficultyLevel || "").toLowerCase() === 'advanced').length}
+            </p>
           </div>
         </div>
 

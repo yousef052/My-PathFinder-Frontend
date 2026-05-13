@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useProfile } from "../../hooks/useProfile";
 
 const inputCls =
@@ -34,12 +35,12 @@ const EditProfileModal = ({
       }
 
       setFormData({
-        firstName: currentUser.firstName || "",
-        lastName: currentUser.lastName || "",
-        userName: currentUser.userName || "",
-        phoneNumber: currentUser.phoneNumber || "",
-        bio: currentUser.bio || "",
-        location: currentUser.location || "",
+        firstName: currentUser.firstName || currentUser.FirstName || "",
+        lastName: currentUser.lastName || currentUser.LastName || "",
+        userName: currentUser.userName || currentUser.UserName || "",
+        phoneNumber: currentUser.phoneNumber || currentUser.PhoneNumber || "",
+        bio: currentUser.bio || currentUser.Bio || "",
+        location: currentUser.location || currentUser.Location || "",
         dateOfBirth: formattedDate,
       });
     }
@@ -56,7 +57,7 @@ const EditProfileModal = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <>
       <style>{`
         @keyframes modalPop {
@@ -192,7 +193,8 @@ const EditProfileModal = ({
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };
 

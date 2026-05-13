@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAdminCareerPaths } from "../../hooks/useAdminCareerPaths";
 
 const emptyPathForm = {
@@ -187,8 +188,8 @@ const PathModal = ({ isOpen, initialValue, isSaving, onClose, onSubmit, categori
     if (success) onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
       <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative w-full max-w-xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl" style={{ animation: "slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
@@ -243,7 +244,8 @@ const PathModal = ({ isOpen, initialValue, isSaving, onClose, onSubmit, categori
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -271,8 +273,8 @@ const LinkedCoursesModal = ({ isOpen, careerPath, pathCourses, allCourses, isLoa
     if (success) setFormData(emptyPathCourseForm);
   };
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
+  return createPortal(
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
       <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md" onClick={onClose} />
 
       <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl" style={{ animation: "slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
@@ -371,7 +373,8 @@ const LinkedCoursesModal = ({ isOpen, careerPath, pathCourses, allCourses, isLoa
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

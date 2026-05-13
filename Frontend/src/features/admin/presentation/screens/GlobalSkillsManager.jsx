@@ -53,7 +53,12 @@ const SkeletonChips = () => (
 const GlobalSkillsManager = () => {
   const { skills, isLoading, isSaving, error, fetchSkills, createSkill } = useAdminGlobalSkills();
   const [searchTerm, setSearchTerm] = useState("");
-  const [newSkillName, setNewSkillName] = useState("");
+  const [formData, setFormData] = useState({
+    skillName: "",
+    category: "",
+    description: "",
+    isTechnical: false
+  });
 
   useEffect(() => {
     fetchSkills();
@@ -67,11 +72,23 @@ const GlobalSkillsManager = () => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!newSkillName.trim()) return;
-    const success = await createSkill({ skillName: newSkillName.trim() });
+    if (!formData.skillName.trim()) return;
+    const success = await createSkill({ 
+      skillName: formData.skillName.trim(),
+      category: formData.category.trim(),
+      description: formData.description.trim(),
+      isTechnical: formData.isTechnical,
+    });
     if (success) {
-      setNewSkillName("");
-      setSearchTerm(""); // Clear search to see the newly added skill
+      setFormData({ skillName: "", category: "", description: "", isTechnical: false });
+      setSearchTerm(""); 
+    }
+  };
+
+  const handleDelete = async (skill) => {
+    const name = skill.skillName || skill.name || `#${skill.id}`;
+    if (window.confirm(`Delete skill "${name}" from global database?`)) {
+      await deleteGlobalSkill(skill.id);
     }
   };
 
@@ -133,13 +150,27 @@ const GlobalSkillsManager = () => {
               ) : (
                 <div className="flex flex-wrap gap-2.5">
                   {visibleSkills.map((skill, i) => (
-                    <span
+                    <div
                       key={skill.id}
-                      className="group flex cursor-default items-center gap-2 rounded-xl border border-slate-100 bg-white px-4 py-2 text-xs font-black text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 hover:bg-blue-50/50 hover:text-[var(--color-primary)] hover:shadow-md"
+                      className="group flex cursor-default flex-col gap-1 rounded-xl border border-slate-100 bg-white px-4 py-3 text-xs font-black text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 hover:bg-blue-50/50 hover:shadow-md min-w-[120px] relative pr-10"
                       style={{ animation: `fadeSlideUp 0.3s ease both ${Math.min(i * 15, 500)}ms` }}
                     >
-                      {skill.skillName || skill.name || skill.SkillName || skill.Name || "Unnamed Skill"}
-                    </span>
+                      <span className="text-slate-900">{skill.skillName || skill.name || skill.SkillName || "Unnamed"}</span>
+                      {skill.category && (
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{skill.category}</span>
+                      )}
+                      {skill.isTechnical && (
+                        <span className="mt-1 w-fit rounded-full bg-blue-100 px-1.5 py-0.5 text-[8px] text-blue-600 uppercase tracking-tighter">Technical</span>
+                      )}
+                      <button
+                        onClick={() => handleDelete(skill)}
+                        disabled={isSaving}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all active:scale-90"
+                        title="Delete Skill"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -156,18 +187,48 @@ const GlobalSkillsManager = () => {
               <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Expand the database</p>
             </div>
 
-            <form onSubmit={handleAdd} className="space-y-6">
+            <form onSubmit={handleAdd} className="space-y-5">
               <Field label="Skill Name" required>
                 <input
-                  value={newSkillName}
-                  onChange={(e) => setNewSkillName(e.target.value)}
+                  name="skillName"
+                  value={formData.skillName}
+                  onChange={(e) => setFormData(p => ({ ...p, skillName: e.target.value }))}
                   className={inputCls}
-                  placeholder="e.g. React.js, Python, Leadership"
+                  placeholder="e.g. React.js"
                   required
                 />
               </Field>
+              <Field label="Category" required>
+                <input
+                  name="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData(p => ({ ...p, category: e.target.value }))}
+                  className={inputCls}
+                  placeholder="e.g. Frontend"
+                  required
+                />
+              </Field>
+              <Field label="Description">
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
+                  className={`${inputCls} min-h-[80px] resize-none`}
+                  placeholder="What is this skill about?"
+                />
+              </Field>
+              <div className="flex items-center gap-3 py-2">
+                <input 
+                  type="checkbox" 
+                  id="isTechnical"
+                  checked={formData.isTechnical}
+                  onChange={(e) => setFormData(p => ({ ...p, isTechnical: e.target.checked }))}
+                  className="h-5 w-5 rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                />
+                <label htmlFor="isTechnical" className="text-sm font-bold text-slate-700">Technical Skill</label>
+              </div>
               <div className="pt-2">
-                <PrimaryBtn type="submit" disabled={isSaving || !newSkillName.trim()}>
+                <PrimaryBtn type="submit" disabled={isSaving || !formData.skillName.trim()}>
                   {isSaving ? (
                     <span className="flex items-center gap-2">
                       <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />

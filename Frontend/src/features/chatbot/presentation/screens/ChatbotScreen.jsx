@@ -48,7 +48,7 @@ const ChatbotScreen = () => {
           <div>
             <h2 className="text-xl font-black italic tracking-tight text-slate-950">PathFinder AI</h2>
             <p className="text-[9px] font-black uppercase tracking-[0.25em] text-primary mt-0.5">
-              Active Intelligence Engine
+              Assistant Ready
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ const ChatbotScreen = () => {
             placeholder={
               activeMode === MODES.ROADMAP
                 ? "Enter target job title..."
-                : "Ask PathFinder anything..."
+                : "How can I help you today?"
             }
             className="flex-1 bg-transparent py-3 outline-none text-sm font-bold text-slate-700"
             disabled={isLoading}

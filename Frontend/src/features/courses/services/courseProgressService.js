@@ -11,7 +11,7 @@ export const courseProgressService = {
 
   // التسجيل في كورس جديد
   enroll: async (courseId) => {
-    const response = await apiClient.post(`/CourseProgress/enroll/${courseId}`);
+    const response = await apiClient.post("/CourseProgress/enroll", { courseId });
     return response.data;
   },
 

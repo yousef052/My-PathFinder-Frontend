@@ -9,8 +9,8 @@ export const savedCourseService = {
   },
 
   // Save a course
-  saveCourse: async (courseId) => {
-    const response = await apiClient.post("/SavedCourse", { courseId });
+  saveCourse: async (courseId, notes = "") => {
+    const response = await apiClient.post("/SavedCourse", { courseId, notes });
     return response.data;
   },
 

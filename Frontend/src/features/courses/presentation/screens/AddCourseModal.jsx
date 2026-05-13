@@ -1,5 +1,5 @@
-// src/features/courses/presentation/screens/AddCourseModal.jsx
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Button from "../../../../core/ui_components/Button";
 
 const AddCourseModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
@@ -56,12 +56,12 @@ const AddCourseModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-white rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden border border-white flex flex-col max-h-[90vh]">
         <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50 shrink-0">
           <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">
-            Catalog New Course
+            Add New Course
           </h2>
           <button
             onClick={onClose}
@@ -80,7 +80,7 @@ const AddCourseModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">
-                  Course Identity
+                  Course Details
                 </label>
                 <input
                   type="text"
@@ -187,7 +187,8 @@ const AddCourseModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 export default AddCourseModal;

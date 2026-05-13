@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAdminJobs } from "../../hooks/useAdminJobs";
 import { useAdminJobSources } from "../../hooks/useAdminJobSources";
 
@@ -13,6 +14,9 @@ const TYPE_COLORS      = {
   "Contract":   "bg-amber-50 text-amber-600",
   "Freelance":  "bg-emerald-50 text-emerald-600",
   "Internship": "bg-rose-50 text-rose-600",
+  // Aliases
+  FullTime: "bg-blue-50 text-blue-600",
+  PartTime: "bg-purple-50 text-purple-600",
 };
 const EXP_COLORS       = {
   "Entry Level": "bg-sky-50 text-sky-600",
@@ -21,6 +25,9 @@ const EXP_COLORS       = {
   "Senior":      "bg-violet-50 text-violet-600",
   "Lead":        "bg-fuchsia-50 text-fuchsia-600",
   "Executive":   "bg-pink-50 text-pink-600",
+  // Aliases
+  EntryLevel: "bg-sky-50 text-sky-600",
+  MidLevel: "bg-indigo-50 text-indigo-600",
 };
 
 const emptyJobForm = {
@@ -63,16 +70,19 @@ const SkeletonCard = ({ delay = 0 }) => (
 );
 
 // ─── Job Card ─────────────────────────────────────────────────────────────────
-const JobCard = ({ job, onEdit, onDelete, isSaving, delay = 0 }) => {
+const JobCard = ({ job, jobSources, onEdit, onDelete, isSaving, delay = 0 }) => {
+  const sourceName = jobSources?.find(s => s.id === job.sourceId || s.id === job.SourceId)?.sourceName || "Internal";
   const typeCls = TYPE_COLORS[job.jobType] || "bg-slate-100 text-slate-500";
   const expCls  = EXP_COLORS[job.experienceLevel]  || "bg-slate-100 text-slate-500";
+  const sMin = job.salaryMin ?? job.SalaryMin ?? 0;
+  const sMax = job.salaryMax ?? job.SalaryMax ?? 0;
   const salary  =
-    job.salaryMin > 0 && job.salaryMax > 0
-      ? `$${job.salaryMin.toLocaleString()} – $${job.salaryMax.toLocaleString()}`
-      : job.salaryMin > 0
-      ? `From $${job.salaryMin.toLocaleString()}`
-      : job.salaryMax > 0
-      ? `Up to $${job.salaryMax.toLocaleString()}`
+    sMin > 0 && sMax > 0
+      ? `$${sMin.toLocaleString()} – $${sMax.toLocaleString()}`
+      : sMin > 0
+      ? `From $${sMin.toLocaleString()}`
+      : sMax > 0
+      ? `Up to $${sMax.toLocaleString()}`
       : null;
 
   return (
@@ -90,10 +100,10 @@ const JobCard = ({ job, onEdit, onDelete, isSaving, delay = 0 }) => {
         </div>
         <div className="flex flex-wrap gap-1.5">
           <span className={`rounded-xl px-2.5 py-1 text-[9px] font-black uppercase tracking-widest ${typeCls}`}>
-            {job.jobType}
+            {job.jobType || job.JobType}
           </span>
           <span className={`rounded-xl px-2.5 py-1 text-[9px] font-black uppercase tracking-widest ${expCls}`}>
-            {job.experienceLevel}
+            {job.experienceLevel || job.ExperienceLevel}
           </span>
         </div>
       </div>
@@ -101,15 +111,17 @@ const JobCard = ({ job, onEdit, onDelete, isSaving, delay = 0 }) => {
       {/* Body */}
       <div className="flex-1">
         <h3 className="text-base font-black leading-snug text-slate-900 line-clamp-2">
-          {job.jobTitle}
+          {job.jobTitle || job.JobTitle || job.title}
         </h3>
-        <p className="mt-1 text-xs font-bold text-slate-500">{job.companyName}</p>
+        <p className="mt-1 text-xs font-bold text-slate-500">
+          {job.companyName || job.CompanyName} <span className="text-slate-300 mx-1">•</span> <span className="text-admin-main opacity-80">{sourceName}</span>
+        </p>
 
         {/* Meta row */}
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] font-bold text-slate-400">
-          {job.location && (
+          {(job.location || job.Location) && (
             <span className="flex items-center gap-1">
-              <span>📍</span> {job.location}
+              <span>📍</span> {job.location || job.Location}
             </span>
           )}
           {salary && (
@@ -125,9 +137,9 @@ const JobCard = ({ job, onEdit, onDelete, isSaving, delay = 0 }) => {
         </div>
 
         {/* Description preview */}
-        {job.description && (
+        {(job.description || job.Description) && (
           <p className="mt-3 text-xs font-medium leading-relaxed text-slate-400 line-clamp-2">
-            {job.description}
+            {job.description || job.Description}
           </p>
         )}
       </div>
@@ -230,9 +242,9 @@ const JobModal = ({ isOpen, title, initialValue, isSaving, onClose, onSubmit, jo
     if (ok) onClose();
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       style={{ animation: "fadeIn 0.2s ease both" }}
     >
       {/* Backdrop */}
@@ -343,7 +355,8 @@ const JobModal = ({ isOpen, title, initialValue, isSaving, onClose, onSubmit, jo
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -401,12 +414,26 @@ const JobsManager = () => {
   };
 
   // Stats
-  const stats = useMemo(() => ({
-    total:    jobs.length,
-    active:   jobs.filter((j) => !j.expiryDate || new Date(j.expiryDate) > Date.now()).length,
-    fullTime: jobs.filter((j) => j.jobType === "Full-time").length,
-    remote:   jobs.filter((j) => (j.location || "").toLowerCase().includes("remote")).length,
-  }), [jobs]);
+  const stats = useMemo(() => {
+    const total    = jobs.length;
+    const active   = jobs.filter((j) => !j.expiryDate || new Date(j.expiryDate) > Date.now()).length;
+    
+    // Normalize string for comparison
+    const norm = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    const fullTime = jobs.filter((j) => {
+      const type = norm(j.jobType || j.JobType);
+      return type === "fulltime";
+    }).length;
+
+    const remote = jobs.filter((j) => {
+      const type = norm(j.jobType || j.JobType);
+      const loc  = (j.location || j.Location || "").toLowerCase();
+      return type === "remote" || loc.includes("remote");
+    }).length;
+
+    return { total, active, fullTime, remote };
+  }, [jobs]);
 
   return (
     <>
@@ -510,7 +537,9 @@ const JobsManager = () => {
         {/* ── Jobs Grid ── */}
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {[...Array(6)].map((_, i) => <SkeletonCard key={i} delay={i * 60} />)}
+            {[...Array(6)].map((_, i) => (
+              <SkeletonCard key={i} delay={i * 80} />
+            ))}
           </div>
         ) : visibleJobs.length === 0 ? (
           <div
@@ -539,6 +568,7 @@ const JobsManager = () => {
                 <JobCard
                   key={job.id}
                   job={job}
+                  jobSources={jobSources}
                   onEdit={openEdit}
                   onDelete={handleDelete}
                   isSaving={isSaving}

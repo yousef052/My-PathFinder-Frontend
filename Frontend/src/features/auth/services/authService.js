@@ -5,13 +5,15 @@ import { apiClient } from "../../../core/network/apiClient";
 export const authService = {
   login: async (credentials) => {
     return apiClient.post("/Auth/Login", {
-      Email: credentials.Email,
-      Password: credentials.Password,
+      email: credentials.email,
+      password: credentials.password,
     });
   },
 
   register: async (userData) => {
-    const response = await apiClient.post("/Auth/Register", userData);
+    // Exclude phoneNumber if API doesn't support it
+    const { phoneNumber, ...payload } = userData;
+    const response = await apiClient.post("/Auth/Register", payload);
     return response.data;
   },
 

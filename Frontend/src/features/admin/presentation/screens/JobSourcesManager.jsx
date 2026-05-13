@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAdminJobSources } from "../../hooks/useAdminJobSources";
 
 const emptySourceForm = {
@@ -165,8 +166,8 @@ const JobSourceModal = ({ isOpen, title, initialValue, isSaving, onClose, onSubm
     if (success) onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
       <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white shadow-2xl" style={{ animation: "slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
@@ -208,7 +209,8 @@ const JobSourceModal = ({ isOpen, title, initialValue, isSaving, onClose, onSubm
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -273,6 +275,14 @@ const JobSourcesManager = () => {
           <PrimaryBtn onClick={openCreate} disabled={isSaving}>
             + New Job Source
           </PrimaryBtn>
+        </div>
+        
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="flex flex-col justify-center rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md" style={{ animation: "fadeSlideUp 0.4s ease both" }}>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Sources</p>
+            <p className="mt-1 text-3xl font-black text-slate-900">{jobSources.length}</p>
+          </div>
         </div>
 
         {error && (

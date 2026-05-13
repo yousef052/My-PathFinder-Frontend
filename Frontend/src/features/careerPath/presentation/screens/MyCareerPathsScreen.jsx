@@ -33,22 +33,22 @@ const MyCareerPathsScreen = () => {
              {isLoading && recommendedPaths.length === 0 ? (
                 [...Array(3)].map((_, i) => <div key={i} className="col-span-4 lg:col-span-4 h-80 bg-white rounded-[3rem] animate-pulse" />)
              ) : (
-                recommendedPaths.map(path => (
-                   <div key={path.id} className="col-span-4 lg:col-span-4 p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl relative overflow-hidden group">
-                      <div className="relative z-10 space-y-6">
-                         <div className="flex justify-between items-start">
-                            <span className="px-3 py-1 bg-primary/20 text-primary text-[8px] font-black uppercase tracking-widest rounded-lg">98% Fit</span>
-                            <span className="text-2xl opacity-50 group-hover:rotate-12 transition-transform">🎯</span>
-                         </div>
-                         <h3 className="text-xl font-black italic">{path.careerPathName}</h3>
-                         <p className="text-xs text-slate-400 line-clamp-2">{path.description}</p>
-                         <div className="pt-6 border-t border-white/10 flex justify-between items-center">
-                            <button onClick={() => navigate(`/career-paths/${path.id}`)} className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white">Inspect</button>
-                            <button onClick={() => enrollInPath(path.id)} className="bg-white text-slate-900 px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all">Enroll</button>
-                         </div>
-                      </div>
-                   </div>
-                ))
+                 recommendedPaths.map(path => (
+                    <div key={path.id} className="col-span-4 lg:col-span-4 p-8 bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] shadow-glass relative overflow-hidden group transition-all hover:shadow-2xl">
+                       <div className="relative z-10 space-y-6">
+                          <div className="flex justify-between items-start">
+                             <span className="px-3 py-1 themed-bg themed-text text-[8px] font-black uppercase tracking-widest rounded-lg">98% Fit</span>
+                             <span className="text-2xl opacity-30 group-hover:opacity-100 group-hover:rotate-12 transition-all">🎯</span>
+                          </div>
+                          <h3 className="text-lg font-black italic text-slate-950 leading-tight">{path.careerPathName}</h3>
+                          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{path.description}</p>
+                          <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
+                             <button onClick={() => navigate(`/career-paths/${path.id}`)} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:themed-text transition-colors">Inspect Details</button>
+                             <button onClick={() => enrollInPath(path.id)} className="themed-button px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all">Enroll Now</button>
+                          </div>
+                       </div>
+                    </div>
+                 ))
              )}
           </div>
         </div>

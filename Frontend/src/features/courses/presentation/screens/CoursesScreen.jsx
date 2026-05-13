@@ -8,6 +8,7 @@ import AddCourseModal from "./AddCourseModal";
 import { useAuth } from "../../../../core/context/AuthContext";
 import Button from "../../../../core/ui_components/Button";
 import Input from "../../../../core/ui_components/Input";
+import UserFlowFooter from "../../../../core/ui_components/UserFlowFooter";
 
 const CoursesScreen = () => {
   const { courses, isLoading: isCoursesLoading, fetchCourses, enrollInCourse, addCourse } = useCourses();
@@ -18,15 +19,6 @@ const CoursesScreen = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.style.setProperty('--theme-color', '#10b981');
-    document.documentElement.style.setProperty('--bg-orb-1', '#10b981');
-    document.documentElement.style.setProperty('--bg-orb-2', '#34d399');
-    document.documentElement.style.setProperty('--bg-orb-3', '#064e3b');
-    document.documentElement.style.setProperty('--bg-gradient-start', '#064e3b');
-    document.documentElement.style.setProperty('--bg-gradient-end', '#022c22');
-  }, []);
 
   useEffect(() => {
     fetchCourses();
@@ -45,12 +37,12 @@ const CoursesScreen = () => {
       {/* ── Tabs & Search ── */}
       <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
         <div className="flex bg-emerald-50/50 backdrop-blur-md p-1.5 rounded-2xl border border-emerald-100 shadow-sm">
-          <button onClick={() => setActiveTab("all")} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === "all" ? "bg-emerald-500 text-white shadow-md" : "text-emerald-600/40 hover:text-emerald-600"}`}>Catalog</button>
-          <button onClick={() => setActiveTab("learning")} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === "learning" ? "bg-emerald-500 text-white shadow-md" : "text-emerald-600/40 hover:text-emerald-600"}`}>My Journey</button>
+          <button onClick={() => setActiveTab("all")} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === "all" ? "bg-emerald-500 text-white shadow-md" : "text-emerald-600/40 hover:text-emerald-600"}`}>All Courses</button>
+          <button onClick={() => setActiveTab("learning")} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === "learning" ? "bg-emerald-500 text-white shadow-md" : "text-emerald-600/40 hover:text-emerald-600"}`}>My Courses</button>
         </div>
         
         <div className="flex-1 max-w-lg w-full">
-           <Input placeholder="Search Academy..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} icon="🔍" />
+           <Input placeholder="Search Courses..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} icon="🔍" />
         </div>
 
         {isAdmin && <Button onClick={() => setIsAddModalOpen(true)} variant="primary">Add Course</Button>}
@@ -76,7 +68,7 @@ const CoursesScreen = () => {
                [...Array(3)].map((_, i) => <div key={i} className="col-span-4 lg:col-span-4 h-64 bg-white rounded-[2rem] animate-pulse" />)
             ) : userProgress.length === 0 ? (
                <div className="col-span-14 py-16 text-center glass-card rounded-[2.5rem] border-dashed border-slate-200">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">No active nodes detected. Start a course to begin tracking.</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">No enrolled courses found. Start a course to begin tracking.</p>
                </div>
             ) : (
               userProgress.map((prog) => (
@@ -103,6 +95,7 @@ const CoursesScreen = () => {
       </div>
 
       <AddCourseModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSubmit={addCourse} isLoading={isCoursesLoading} />
+      <UserFlowFooter currentPath="/courses" />
     </div>
   );
 };
