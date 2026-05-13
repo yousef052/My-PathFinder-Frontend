@@ -5,8 +5,8 @@ import { apiClient } from "../../../core/network/apiClient";
 export const authService = {
   login: async (credentials) => {
     return apiClient.post("/Auth/Login", {
-      email: credentials.email,
-      password: credentials.password,
+      Email: credentials.Email,
+      Password: credentials.Password,
     });
   },
 
@@ -30,7 +30,6 @@ export const authService = {
     return response.data;
   },
 
-  // 💡 التعديل هنا: الدالة تستقبل الكائن جاهزاً من الـ Hook
   googleLogin: async (payload) => {
     const response = await apiClient.post("/Auth/Google-login", payload);
     return response.data;
@@ -38,6 +37,11 @@ export const authService = {
 
   resendOtp: async (email) => {
     const response = await apiClient.post("/Auth/resend-otp", { email });
+    return response.data;
+  },
+
+  logout: async () => {
+    const response = await apiClient.post("/Auth/logout");
     return response.data;
   },
 };

@@ -7,26 +7,37 @@ import EducationSection from "../components/EducationSection";
 import EditProfileModal from "../components/EditProfileModal";
 import { resolveMediaUrl } from "../../../../core/utils/mediaUrl";
 
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 const ProfileScreen = () => {
   const { user, isLoading: isProfileLoading, refreshProfile } = useProfile();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  if (isProfileLoading)
+  React.useEffect(() => {
+    document.documentElement.style.setProperty('--theme-color', '#4763e1');
+    document.documentElement.style.setProperty('--bg-orb-1', '#4763e1');
+    document.documentElement.style.setProperty('--bg-orb-2', '#33aefc');
+    document.documentElement.style.setProperty('--bg-orb-3', '#1e1b4b');
+    document.documentElement.style.setProperty('--bg-gradient-start', '#1e1b4b');
+    document.documentElement.style.setProperty('--bg-gradient-end', '#0f172a');
+  }, []);
+
+  if (isProfileLoading) {
     return (
-      <div className="flex items-center justify-center py-40">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#5b7cfa]"></div>
+      <div className="flex h-[50vh] flex-col items-center justify-center gap-4 animate-fade-in">
+        <div className="h-16 w-16 animate-spin rounded-full border-[6px] border-primary/20 border-t-primary shadow-xl" />
+        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary animate-pulse">Scanning Profile...</p>
       </div>
     );
+  }
 
   const rawPic = user?.profilePictureUrl || user?.ProfilePictureUrl;
   const finalProfilePic = resolveMediaUrl(rawPic);
-
-  // 💡 التفكير الهندسي: معالجة البيانات الناقصة بذكاء
   const isProfileIncomplete = !user?.firstName || !user?.lastName;
+
   const displayName =
     user?.firstName && user?.lastName
-      ? `${user?.firstName} ${user?.lastName}`
-      : user?.userName || "Professional User";
+      ? `${user.firstName} ${user.lastName}`
+      : user?.userName || "PathFinder Talent";
 
   const initial = user?.firstName
     ? user.firstName[0]
@@ -35,7 +46,7 @@ const ProfileScreen = () => {
       : "P";
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-fade-in pb-20 px-4">
+    <div className="space-y-10 pb-16 animate-pop">
       <EditProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -43,80 +54,57 @@ const ProfileScreen = () => {
         onUpdateSuccess={refreshProfile}
       />
 
-      {/* 💡 Banner لتشجيع المستخدم على إكمال بياناته إذا كانت ناقصة */}
+      {/* ── Incomplete Profile Alert ── */}
       {isProfileIncomplete && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-6 rounded-3xl flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in shadow-sm mt-4">
-          <div>
-            <h3 className="font-black text-lg mb-1">
-              Welcome to Path Finder! 🎉
-            </h3>
-            <p className="text-sm font-medium opacity-80">
-              Please take a moment to set up your profile name and bio to unlock
-              personalized recommendations.
-            </p>
+        <div className="group relative flex flex-col items-center justify-between gap-6 overflow-hidden rounded-[2.5rem] bg-primary p-8 shadow-2xl shadow-primary/20 sm:flex-row">
+          <div className="relative z-10 text-center sm:text-left">
+             <h3 className="text-xl font-black text-white italic mb-1">Establish Identity 🚀</h3>
+             <p className="text-xs font-medium text-white/80 leading-relaxed">
+               Your profile is currently an anonymous node. Complete setup to calibrate AI.
+             </p>
           </div>
-          <button
-            onClick={() => setIsEditModalOpen(true)}
-            className="bg-[#5b7cfa] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-colors whitespace-nowrap shadow-md"
-          >
-            Complete Profile
-          </button>
+          <button onClick={() => setIsEditModalOpen(true)} className="relative z-10 shrink-0 bg-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary shadow-xl hover:-translate-y-1 transition-all">Calibrate Now ↗</button>
         </div>
       )}
 
-      {/* Profile Header */}
-      <div className="bg-white p-10 md:p-14 rounded-[3.5rem] shadow-xl shadow-blue-50/50 border border-white flex flex-col md:flex-row gap-10 items-center md:items-start relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50 z-0"></div>
-
-        <div className="w-40 h-40 md:w-48 md:h-48 bg-[#5b7cfa] text-white rounded-[2.5rem] flex items-center justify-center text-6xl font-black shadow-2xl shadow-blue-200 overflow-hidden border-4 border-white relative z-10">
-          {finalProfilePic ? (
-            <img
-              src={finalProfilePic}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="uppercase">{initial}</div>
-          )}
+      {/* ── Profile Hero ── */}
+      <div className="glass-card relative flex flex-col items-center gap-10 overflow-hidden p-10 md:p-14 rounded-[4rem] md:flex-row group border border-white/50 shadow-glass bg-white/70 backdrop-blur-xl">
+        <div className="relative z-10 flex h-44 w-44 shrink-0 items-center justify-center overflow-hidden rounded-[2rem] border-4 border-white bg-slate-100 text-6xl font-black text-slate-300 shadow-2xl md:h-52 md:w-52 transition-all duration-700 hover:scale-105 group-hover:rotate-2">
+          {finalProfilePic ? <img src={finalProfilePic} alt="Profile" className="h-full w-full object-cover" /> : <div className="uppercase tracking-tighter">{initial}</div>}
         </div>
 
-        <div className="flex-1 space-y-6 relative z-10 text-center md:text-left">
-          <div className="space-y-2">
-            {/* 💡 استخدام الـ Display Name الآمن */}
-            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 capitalize tracking-tight">
-              {displayName}
-            </h2>
-            <p className="text-xl text-gray-400 font-semibold italic">
-              {user?.bio || "No bio set yet."}
-            </p>
+        <div className="relative z-10 flex-1 space-y-6 text-center md:text-left">
+          <div className="space-y-3">
+            <div className="inline-flex rounded-full bg-primary/10 px-4 py-1.5 text-[9px] font-black uppercase tracking-widest text-primary">Verified Talent Node</div>
+            <h2 className="text-4xl font-black capitalize tracking-tighter text-slate-950 lg:text-7xl leading-[0.8] italic uppercase">{displayName}</h2>
+            <p className="max-w-2xl text-lg font-medium italic text-slate-400 leading-relaxed">{user?.bio || "Professional Trajectory Active. Ready for optimization."}</p>
           </div>
-          <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-slate-50">
-            <span className="bg-slate-50 px-5 py-2.5 rounded-2xl text-gray-600 font-black text-[11px] uppercase tracking-widest border border-gray-50">
-              📍 {user?.location || "Not Set"}
-            </span>
-            <span className="bg-slate-50 px-5 py-2.5 rounded-2xl text-gray-600 font-black text-[11px] uppercase tracking-widest border border-gray-50">
-              📧 {user?.email}
-            </span>
+          <div className="flex flex-wrap justify-center gap-4 pt-4 md:justify-start">
+            <div className="bg-white/50 backdrop-blur-md px-6 py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest text-slate-500 border border-slate-100 shadow-sm flex items-center gap-2"><span>📍</span> {user?.location || "Global Node"}</div>
+            <div className="bg-white/50 backdrop-blur-md px-6 py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest text-slate-500 border border-slate-100 shadow-sm flex items-center gap-2"><span>📧</span> {user?.email}</div>
           </div>
         </div>
 
-        <button
-          onClick={() => setIsEditModalOpen(true)}
-          className="relative z-30 md:absolute top-10 right-10 bg-white text-[#5b7cfa] hover:bg-[#5b7cfa] hover:text-white px-8 py-4 rounded-2xl font-black transition-all border border-blue-100 shadow-lg flex items-center gap-2 uppercase text-[10px] tracking-widest active:scale-95"
-        >
-          ✏️ Edit Profile
-        </button>
+        <button onClick={() => setIsEditModalOpen(true)} className="relative z-30 bg-primary text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all md:absolute md:right-12 md:top-12">✏️ Update Node</button>
       </div>
 
-      {/* Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        <div className="lg:col-span-4 space-y-10">
+      {/* ── Content Grid ── */}
+      <div className="grid grid-main items-start">
+        <div className="col-span-4 lg:col-span-4 lg:sticky lg:top-24">
           <SkillsSection />
         </div>
-
-        <div className="lg:col-span-8 space-y-10">
+        <div className="col-span-4 lg:col-span-10 space-y-10">
           <ExperienceSection />
           <EducationSection />
+          
+          <div className="glass-card p-10 rounded-[3rem] border border-slate-100 shadow-glass flex flex-col items-center text-center space-y-4">
+             <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl">📄</div>
+             <div>
+               <h4 className="text-xl font-black text-slate-950 italic">Portfolio Synchronized</h4>
+               <p className="text-xs font-medium text-slate-400 mt-2 max-w-lg">Your identity node is stable. Proceed to the CV Lab for high-precision analysis.</p>
+             </div>
+             <button onClick={() => window.location.href = "/cv-manager"} className="bg-primary text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all">Manage CV Portfolio →</button>
+          </div>
         </div>
       </div>
     </div>

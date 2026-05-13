@@ -3,8 +3,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useLogin } from "../../hooks/useLogin";
-import Button from "../../../../core/ui_components/Button";
-import Input from "../../../../core/ui_components/Input";
 
 const LoginScreen = () => {
   const {
@@ -17,80 +15,93 @@ const LoginScreen = () => {
     handleGoogleError,
   } = useLogin();
 
+  const inputCls = "w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-bold text-slate-700 outline-none transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10";
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#F8F9FD] p-6">
-      <div className="w-full max-w-md bg-white rounded-[3rem] p-12 shadow-2xl shadow-blue-100 border border-white animate-fade-in">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-black text-gray-900 mb-2">Welcome</h1>
-          <p className="text-gray-400 font-medium text-sm leading-relaxed">
-            Please enter your details to login <br /> to your account
+    <div className="flex min-h-screen items-center justify-center p-6 relative bg-slate-50">
+      
+      <div 
+        className="w-full max-w-md p-10 sm:p-14 rounded-[3.5rem] bg-white shadow-2xl shadow-blue-100/50 border border-slate-100 relative z-10"
+        style={{ animation: "animate-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both" }}
+      >
+        <div className="mb-12 text-center animate-fade-in-up">
+          <div className="mx-auto mb-8 flex h-16 w-32 items-center justify-center rounded-2xl bg-slate-950 text-[10px] font-black uppercase tracking-[0.4em] text-white shadow-2xl">
+            Identity
+          </div>
+          <h1 className="mb-3 text-4xl font-black tracking-tight text-slate-950 italic">Welcome</h1>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+            PathFinder Identity Portal
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 text-xs font-bold rounded-2xl border border-red-100 text-center animate-shake">
+          <div className="mb-8 rounded-2xl bg-red-50 p-4 text-center text-[10px] font-black uppercase tracking-widest text-red-500 border border-red-100 animate-shake">
             ⚠️ {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <Input
-            label="Email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="example@mail.com"
-          />
-          <div className="relative">
-            <Input
-              label="Password"
-              name="password"
+        <form onSubmit={handleLogin} className="space-y-8 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Email Node</label>
+            <input
+              type="email"
+              name="Email"
+              value={formData.Email}
+              onChange={handleChange}
+              placeholder="explorer@pathfinder.ai"
+              className={inputCls}
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between items-center px-1">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500">Security Key</label>
+              <Link to="/recover-password" title="Forgot Password" className="text-[9px] font-black uppercase tracking-widest text-primary hover:underline">Lost access?</Link>
+            </div>
+            <input
               type="password"
-              value={formData.password}
+              name="Password"
+              value={formData.Password}
               onChange={handleChange}
               placeholder="••••••••"
+              className={inputCls}
+              required
+              disabled={isLoading}
             />
-            <Link
-              to="/recover-password"
-              title="Recover Password"
-              className="absolute top-0 right-0 text-[10px] font-black text-primary hover:underline uppercase tracking-widest"
-            >
-              Forgot?
-            </Link>
           </div>
-          <Button
+
+          <button
             type="submit"
-            isLoading={isLoading}
-            fullWidth
-            className="py-4 mt-2"
+            disabled={isLoading}
+            className="group relative mt-4 w-full py-5 bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
           >
-            Login
-          </Button>
+            <span className="relative z-10">{isLoading ? "Synchronizing..." : "Initiate Login →"}</span>
+          </button>
         </form>
 
-        <div className="mt-10 text-center space-y-6">
-          <div className="flex items-center gap-3 text-gray-200">
-            <div className="flex-1 h-[1px] bg-gray-100"></div>
-            <span className="text-[10px] font-black uppercase text-gray-300">
-              Or Login with
-            </span>
-            <div className="flex-1 h-[1px] bg-gray-100"></div>
+        <div className="mt-12 space-y-8 text-center animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-slate-100" />
+            <span className="text-[8px] font-black uppercase tracking-widest text-slate-300">Third-Party Auth</span>
+            <div className="h-px flex-1 bg-slate-100" />
           </div>
-          <div className="flex justify-center rounded-full overflow-hidden border border-gray-100">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              ux_mode="popup"
-              theme="outline"
-              shape="pill"
-              width="320px"
-            />
+
+          <div className="flex justify-center hover:scale-105 transition-transform active:scale-95">
+             <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                shape="pill"
+                theme="outline"
+                text="continue_with"
+                width="100%"
+              />
           </div>
-          <p className="text-xs text-gray-400 font-bold uppercase">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline ml-1">
-              Sign Up
-            </Link>
+
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            New to the path?{" "}
+            <Link to="/signup" className="text-primary hover:underline font-black ml-1">Begin Journey</Link>
           </p>
         </div>
       </div>

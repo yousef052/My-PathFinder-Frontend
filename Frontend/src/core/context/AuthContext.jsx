@@ -82,6 +82,11 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [checkAuthState]);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem("token");
+    setAuthState({ isAuthenticated: false, userRole: null });
+  }, []);
+
   const value = useMemo(() => {
     const normalizedRole = authState.userRole?.toString().toLowerCase();
 
@@ -90,8 +95,9 @@ export const AuthProvider = ({ children }) => {
       userRole: authState.userRole,
       isAdmin: normalizedRole === "admin",
       refreshAuthState: checkAuthState,
+      logout,
     };
-  }, [authState, checkAuthState]);
+  }, [authState, checkAuthState, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

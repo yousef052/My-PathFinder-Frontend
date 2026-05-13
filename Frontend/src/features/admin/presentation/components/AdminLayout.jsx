@@ -7,6 +7,7 @@ const navItems = [
   { label: "Courses", path: "/admin/courses", marker: "CO" },
   { label: "Categories", path: "/admin/categories", marker: "CA" },
   { label: "Platforms", path: "/admin/platforms", marker: "PL" },
+  { label: "Jobs", path: "/admin/jobs", marker: "JB" },
   { label: "Job Sources", path: "/admin/job-sources", marker: "JS" },
   { label: "Global Skills", path: "/admin/skills", marker: "SK" },
   { label: "My Profile", path: "/admin/profile", marker: "PR" },
@@ -20,7 +21,7 @@ const AdminLayout = () => {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-slate-200 bg-white lg:flex lg:flex-col">
         <div className="flex h-20 items-center border-b border-slate-100 px-6">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#5b7cfa]">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[var(--color-primary)]">
               Path Finder
             </p>
             <h1 className="mt-1 text-xl font-black tracking-tight">
@@ -37,7 +38,7 @@ const AdminLayout = () => {
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition-all ${
                   isActive
-                    ? "bg-[#5b7cfa] text-white shadow-lg shadow-blue-100"
+                    ? "bg-[var(--color-primary)] text-white shadow-lg shadow-blue-100"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
                 }`
               }
@@ -61,7 +62,7 @@ const AdminLayout = () => {
           </div>
           <Link
             to="/dashboard"
-            className="mt-3 flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-[#5b7cfa] hover:text-[#5b7cfa]"
+            className="mt-3 flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
           >
             Back to App
           </Link>
@@ -72,7 +73,7 @@ const AdminLayout = () => {
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 px-5 py-4 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#5b7cfa]">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[var(--color-primary)]">
                 Admin
               </p>
               <h1 className="text-lg font-black">Console</h1>
@@ -92,7 +93,7 @@ const AdminLayout = () => {
                 className={({ isActive }) =>
                   `shrink-0 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${
                     isActive
-                      ? "bg-[#5b7cfa] text-white"
+                      ? "bg-[var(--color-primary)] text-white"
                       : "bg-slate-100 text-slate-500"
                   }`
                 }

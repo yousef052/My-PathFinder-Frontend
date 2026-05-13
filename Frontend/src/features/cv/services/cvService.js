@@ -4,8 +4,8 @@ import { apiClient } from "../../../core/network/apiClient";
 export const cvService = {
   uploadCv: async (file, isPrimary = true) => {
     const formData = new FormData();
-    formData.append("File", file); // مطابقة الاسم في Swagger
-    formData.append("IsPrimary", isPrimary);
+    formData.append("File", file); // PascalCase matches backend expected multipart key
+    formData.append("IsPrimary", String(isPrimary));
 
     return apiClient.post("/Cv/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -13,13 +13,15 @@ export const cvService = {
   },
 
   getMyCvs: async () => {
-    return apiClient.get("/Cv/my-cvs");
+    const response = await apiClient.get("/Cv/my-cvs");
+    return response.data;
   },
 
   compareCvs: async (cvIds) => {
-    // 💡 التفكير الهندسي: تجربة استخدام CvIds (Capital C) تحسباً لكون الباك إند Case-Sensitive
+    // Swagger: POST /api/Cv/compare - Payload: cvIds[]
+    // Using camelCase 'cvIds' as per Swagger list provided
     return apiClient.post("/Cv/compare", { 
-      CvIds: cvIds.map(id => Number(id)) 
+      cvIds: cvIds.map(id => Number(id)) 
     }).then(res => res.data?.data || res.data);
   },
 
@@ -28,17 +30,18 @@ export const cvService = {
       const response = await apiClient.get("/UserCareerPath/recommended");
       return response.data;
     } catch (err) {
-      // 💡 Swagger shows GET, but if it returns 400, it's likely a profile state issue
       console.warn("Recommended paths not available yet.", err.response?.status);
       return [];
     }
   },
 
   deleteCv: async (cvId) => {
-    return apiClient.delete(`/Cv/${cvId}`);
+    const response = await apiClient.delete(`/Cv/${cvId}`);
+    return response.data;
   },
 
   setPrimary: async (cvId) => {
-    return apiClient.put(`/Cv/${cvId}/set-primary`);
+    const response = await apiClient.put(`/Cv/${cvId}/set-primary`);
+    return response.data;
   },
 };

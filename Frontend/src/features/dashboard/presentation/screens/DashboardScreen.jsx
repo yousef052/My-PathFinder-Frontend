@@ -1,189 +1,165 @@
-// src/features/dashboard/presentation/screens/DashboardScreen.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useProfile } from "../../../profile/hooks/useProfile";
 import { useCourseRecommendation } from "../../../courses/hooks/useCourseRecommendation";
 import { useCourseProgress } from "../../../courses/hooks/useCourseProgress";
 import { useSkills } from "../../../profile/hooks/useSkills";
 import { Link } from "react-router-dom";
-import CourseCard from "../../../courses/presentation/components/CourseCard";
-import Button from "../../../../core/ui_components/Button";
 
+// ─── Stat Counter Component ───────────────────────────────────────────────────
+const StatCounter = ({ end, duration = 2000 }) => {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      setCount(Math.floor(progress * end));
+      if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+  }, [end, duration]);
+  return <span>{count}</span>;
+};
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 const DashboardScreen = () => {
   const { user, isLoading: isProfileLoading } = useProfile();
-  const {
-    recommendations,
-    fetchRecommendations,
-    isLoading: isRecLoading,
-  } = useCourseRecommendation();
+  const { recommendations, fetchRecommendations } = useCourseRecommendation();
   const { userProgress, fetchMyProgress } = useCourseProgress();
   const { mySkills } = useSkills();
 
   useEffect(() => {
-    if (fetchMyProgress) fetchMyProgress();
+    if (fetchMyProgress) fetchMyProgress(); document.documentElement.style.setProperty("--theme-color", "#4763e1"); document.documentElement.style.setProperty("--bg-orb-1", "#4763e1"); document.documentElement.style.setProperty("--bg-orb-2", "var(--color-secondary)"); document.documentElement.style.setProperty("--bg-orb-3", "#1e293b"); document.documentElement.style.setProperty("--bg-gradient-start", "#0f172a"); document.documentElement.style.setProperty("--bg-gradient-end", "#020617");
   }, [fetchMyProgress]);
 
   useEffect(() => {
-    const targetTitle =
-      user?.targetJobTitle ||
-      user?.TargetJobTitle ||
-      user?.desiredJobTitle ||
-      user?.jobTitle ||
-      "";
-
+    const targetTitle = user?.targetJobTitle || user?.jobTitle || "";
     fetchRecommendations(targetTitle);
   }, [fetchRecommendations, user]);
 
-  if (isProfileLoading)
+  if (isProfileLoading) {
     return (
-      <div className="flex flex-col justify-center items-center py-40 gap-4">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
-        <p className="text-primary font-black text-[10px] uppercase tracking-widest animate-pulse">
-          Syncing Journey...
-        </p>
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-6 animate-fade-in">
+        <div className="h-24 w-24 animate-spin rounded-full border-[8px] border-primary border-t-transparent shadow-2xl" />
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-primary animate-pulse">Syncing Trajectory...</p>
       </div>
     );
+  }
 
-  const isProfileIncomplete = !user?.firstName || !user?.lastName;
   const greetingName = user?.firstName || user?.userName || "Explorer";
 
+  // Journey Intelligence: Decide the next mission
+  const getNextMission = () => {
+    if (!mySkills || mySkills.length === 0) return { title: "Establish Identity", task: "Analyze CV to extract your skill matrix", link: "/cv-manager", icon: "📄", color: "bg-cv" };
+    if (!user?.targetJobTitle) return { title: "Define Objective", task: "Take the AI Career Discovery to map your path", link: "/career-match", icon: "🎯", color: "bg-primary" };
+    if (userProgress && userProgress.length > 0) return { title: "Maintain Momentum", task: "Continue your active learning tracks", link: "/courses", icon: "📚", color: "bg-success" };
+    return { title: "Explore Markets", task: "Discover job opportunities for your profile", link: "/jobs", icon: "💼", color: "bg-secondary" };
+  };
+
+  const mission = getNextMission();
+
   return (
-    <div className="space-y-12 pb-24 animate-fade-in-up">
-      {/* Premium Hero Section */}
-      <div className="relative overflow-hidden bg-slate-950 rounded-[4rem] p-12 lg:p-20 text-white shadow-2xl group border border-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#5b7cfa]/20 via-transparent to-transparent opacity-60"></div>
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#5b7cfa]/10 rounded-full blur-[100px]"></div>
+    <div className="space-y-16 pb-16">
+      
+      {/* ── Dynamic Mission Portal ── */}
+      <div className="grid grid-main items-stretch gap-y-12">
         
-        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-16">
-          <div className="space-y-10 max-w-2xl text-center lg:text-left">
-            <div className="inline-flex px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[#5b7cfa] text-[9px] font-black uppercase tracking-[0.3em] backdrop-blur-md">
-              Evolutionary Path Active ⚡
+        {/* Welcome Block (Spans 10 of 14 columns) */}
+        <div className="col-span-4 lg:col-span-10 p-8 rounded-[3rem] bg-white border border-slate-100 shadow-glass relative overflow-hidden group animate-fade-in-up">
+           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-primary/10 transition-all duration-1000" />
+           <div className="relative z-10 space-y-8">
+              <div className="flex items-center gap-3">
+                 <div className="w-12 h-12 bg-slate-950 rounded-2xl flex items-center justify-center text-xl shadow-xl">👋</div>
+                 <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Status: Active</p>
+              </div>
+              <h2 className="text-6xl md:text-8xl font-black text-slate-950 tracking-tighter leading-[0.8] uppercase italic">
+                Ready for the <br />
+                next <span className="text-primary not-italic">leap,</span> <br />
+                <span className="text-slate-400">{greetingName}?</span>
+              </h2>
+              <div className="flex flex-wrap gap-4 pt-4">
+                 <div className="px-6 py-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                    <span className="text-primary font-black"><StatCounter end={userProgress?.length || 0} /></span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tracks Active</span>
+                 </div>
+                 <div className="px-6 py-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                    <span className="text-secondary font-black"><StatCounter end={mySkills?.length || 0} /></span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Verified Skills</span>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        {/* Mission Card (Spans 4 of 14 columns) */}
+        <div className="col-span-4 lg:col-span-4">
+          <div className="flex h-full flex-col justify-between rounded-[3rem] bg-white/70 backdrop-blur-xl p-8 border border-white/50 shadow-glass transition-all hover:scale-[1.02]">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-2xl shadow-inner">📄</div>
+                 <div className="rounded-full bg-primary/10 px-4 py-1 text-[8px] font-black uppercase tracking-widest text-primary">Next Phase</div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black italic text-slate-950 leading-tight">Establish Identity</h3>
+                <p className="text-xs font-medium leading-relaxed text-slate-500">Analyze CV to extract your skill matrix and professional DNA.</p>
+              </div>
             </div>
-            <h2 className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1] italic">
-              Empower Your <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5b7cfa] to-blue-400">Future, {greetingName}</span>
-            </h2>
-            <p className="text-slate-400 font-medium leading-relaxed opacity-90 text-xl max-w-lg">
-              {userProgress?.length > 0
-                ? `You're currently mastering ${userProgress.length} tracks. Consistency is the key to professional excellence.`
-                : "Your professional transformation starts here. Explore curated paths or take the AI match test."}
-            </p>
-            <div className="flex flex-wrap gap-5 justify-center lg:justify-start pt-4">
-              <Link to="/career-paths">
-                <button className="bg-[#5b7cfa] hover:bg-blue-600 text-white px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-blue-500/20 transition-all hover:scale-105 active:scale-95">
-                  Browse Paths ↗
-                </button>
-              </Link>
-              <Link to="/career-match">
-                <button className="px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-white/10 hover:bg-white/5 transition-all text-white backdrop-blur-sm">
-                  Retake AI Test
-                </button>
-              </Link>
-            </div>
-          </div>
-          
-          <div className="w-full lg:w-80 aspect-square bg-gradient-to-br from-white/5 to-transparent rounded-[3.5rem] border border-white/10 flex items-center justify-center relative group-hover:rotate-3 transition-transform duration-1000">
-             <div className="absolute inset-0 bg-[#5b7cfa]/20 blur-[80px] rounded-full opacity-50"></div>
-             <div className="text-9xl group-hover:scale-110 transition-transform duration-700 select-none">🚀</div>
+            <Link to="/cv-manager" className="group mt-8 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+              Initiate Sequence <span className="transition-transform group-hover:translate-x-2">→</span>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Modernized Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div className="premium-card p-12 bg-white border-slate-100/50 group relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
-          <div className="relative z-10 flex justify-between items-center">
+      {/* ── Action Grid ── */}
+      <div className="grid grid-main items-stretch animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+        {[
+          { icon: "📄", label: "Profile", link: "/profile", count: mySkills?.length || 0, span: "lg:col-span-3", color: "bg-blue-50 text-blue-500" },
+          { icon: "💼", label: "Jobs", link: "/jobs", count: "Global", span: "lg:col-span-4", color: "bg-emerald-50 text-emerald-500" },
+          { icon: "🎓", label: "Courses", link: "/courses", count: recommendations?.length || 0, span: "lg:col-span-4", color: "bg-purple-50 text-purple-500" },
+          { icon: "🎯", label: "Career Match", link: "/career-match", count: "AI", span: "lg:col-span-3", color: "bg-orange-50 text-orange-500" }
+        ].map((item, idx) => (
+          <Link
+            key={idx}
+            to={item.link}
+            className={`col-span-4 ${item.span} group relative p-8 bg-white/70 backdrop-blur-xl border border-white shadow-glass hover:shadow-2xl transition-all duration-700 hover:-translate-y-2 flex flex-col items-center text-center gap-6 rounded-[2.5rem]`}
+          >
+            <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+              {item.icon}
+            </div>
             <div>
-              <p className="text-5xl font-black text-slate-900 mb-2">
-                {userProgress?.length || 0}
-              </p>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
-                Active Learning Tracks
-              </p>
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">{item.label}</p>
+              <h4 className="text-sm font-black text-slate-950 italic">{item.count} Active</h4>
             </div>
-            <div className="w-16 h-16 bg-blue-50 text-[#5b7cfa] rounded-2xl flex items-center justify-center text-3xl shadow-inner rotate-3 group-hover:rotate-12 transition-transform">
-              📚
-            </div>
-          </div>
-        </div>
-        
-        <div className="premium-card p-12 bg-white border-slate-100/50 group relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
-          <div className="relative z-10 flex justify-between items-center">
-            <div>
-              <p className="text-5xl font-black text-[#5b7cfa] mb-2">
-                {mySkills?.length || 0}
-              </p>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
-                Verified Proficiencies
-              </p>
-            </div>
-            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-3xl shadow-inner -rotate-3 group-hover:rotate-0 transition-transform">
-              ⚡
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Hub */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm">
-             <div className="flex justify-between items-center mb-10">
-                <h3 className="text-xl font-black text-slate-900 italic">Quick Access</h3>
-                <span className="w-2 h-2 bg-[#5b7cfa] rounded-full animate-ping"></span>
-             </div>
-             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                {[
-                  { icon: "📄", label: "My CV", link: "/profile/cv" },
-                  { icon: "💼", label: "Jobs", link: "/jobs" },
-                  { icon: "🔖", label: "Library", link: "/saved" },
-                  { icon: "⚙️", label: "Settings", link: "/profile" }
-                ].map((item, idx) => (
-                  <Link key={idx} to={item.link} className="flex flex-col items-center gap-4 group p-6 rounded-[2rem] hover:bg-slate-50 transition-all">
-                    <span className="text-3xl group-hover:scale-125 transition-transform">{item.icon}</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-900">{item.label}</span>
-                  </Link>
-                ))}
-             </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-[#5b7cfa] to-blue-700 rounded-[3.5rem] p-10 text-white flex flex-col justify-center relative overflow-hidden shadow-2xl shadow-blue-200">
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-           <h4 className="text-2xl font-black mb-4 italic leading-tight">Master New <br/>Horizons</h4>
-           <p className="text-blue-100/80 text-xs font-medium mb-8 leading-relaxed">Continue your journey with the latest industry-standard courses.</p>
-           <Link to="/courses">
-              <button className="bg-white text-[#5b7cfa] w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all active:scale-95">
-                Explore Courses
-              </button>
-           </Link>
-        </div>
-      </div>
-
-      {/* Profile Reminder or Analysis State */}
-      {(isProfileIncomplete || (!recommendations.length)) && (
-        <div className="bg-white p-10 rounded-[3.5rem] border border-amber-100 flex flex-col md:flex-row justify-between items-center gap-8 shadow-xl shadow-amber-500/5">
-          <div className="flex items-center gap-6 text-center md:text-left">
-            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-3xl">🏗️</div>
-            <div>
-              <h3 className="font-black text-slate-900 text-lg italic">
-                {(!recommendations.length) ? "Profile Under Analysis" : "Complete Your Foundation"}
-              </h3>
-              <p className="text-slate-400 text-xs font-medium mt-1">
-                {(!recommendations.length) 
-                  ? "Our AI is currently analyzing your background. Add more details to unlock tailored career matching." 
-                  : "Provide more details to unlock tailored career matching."}
-              </p>
-            </div>
-          </div>
-          <Link to="/profile">
-            <button className="bg-amber-500 text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200">
-              Update Profile
-            </button>
           </Link>
-        </div>
-      )}
+        ))}
+      </div>
+
+      {/* ── Recommendation Slide ── */}
+      <div className="p-16 rounded-[4rem] bg-white border border-slate-100 shadow-glass animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+         <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+            <div className="text-center md:text-left">
+               <h3 className="text-3xl font-black text-slate-950 italic mb-2">Recommended Courses</h3>
+               <p className="text-sm font-medium text-slate-500">Intelligent learning paths matched to your target trajectory</p>
+            </div>
+            <Link to="/courses" className="px-10 py-5 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-transform active:scale-95">View Catalog</Link>
+         </div>
+         
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {recommendations?.slice(0, 3).map((rec, i) => (
+               <div key={i} className="p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl transition-all duration-500 group">
+                  <div className="mb-6 flex justify-between items-start">
+                     <span className="px-3 py-1 bg-white rounded-full text-[8px] font-black uppercase tracking-widest text-slate-400">Course</span>
+                     <span className="text-2xl opacity-30 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-500">→</span>
+                  </div>
+                  <h4 className="text-lg font-black text-slate-900 leading-tight mb-4">{rec.title}</h4>
+                  <div className="flex items-center gap-2">
+                     <div className="h-1.5 w-1.5 bg-success rounded-full" />
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">High Match</span>
+                  </div>
+               </div>
+            ))}
+         </div>
+      </div>
     </div>
   );
 };

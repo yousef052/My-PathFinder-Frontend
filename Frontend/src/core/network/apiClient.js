@@ -2,8 +2,9 @@
 import axios from "axios";
 
 export const apiClient = axios.create({
-  baseURL: "https://pathfinder.tryasp.net/api",
-  timeout: 30000,
+  // baseURL: "https://pathfinder.tryasp.net/api", // Old direct URL
+  baseURL: "/api", // Use Vite Proxy to avoid CORS
+  timeout: 60000, // Increased to 60s due to server latency
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

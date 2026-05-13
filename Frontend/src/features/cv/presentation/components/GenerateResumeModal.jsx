@@ -18,14 +18,14 @@ const GenerateResumeModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     if (!formData.targetJobTitle) return;
 
-    const success = await generateAndDownloadResume(formData); // تنفيذ التوليد[cite: 29]
+    const success = await generateAndDownloadResume(formData); // تنفيذ التوليد
     if (success) onClose();
   };
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden border border-gray-100">
-        <div className="p-8 border-b border-gray-50 bg-gradient-to-r from-[#5b7cfa] to-[#3652d9] text-white text-center">
+        <div className="p-8 border-b border-gray-50 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] text-white text-center">
           <span className="text-5xl block mb-3">📄</span>
           <h2 className="text-2xl font-black italic tracking-tight">
             AI Resume Builder

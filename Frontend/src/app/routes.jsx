@@ -1,38 +1,51 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../core/context/AuthContext";
 
+// ── Lazy Loading Screens ──
+const LoginScreen = lazy(() => import("../features/auth/presentation/screens/LoginScreen.jsx"));
+const SignUpScreen = lazy(() => import("../features/auth/presentation/screens/SignUpScreen.jsx"));
+const RecoverPasswordScreen = lazy(() => import("../features/auth/presentation/screens/RecoverPasswordScreen.jsx"));
+const VerificationScreen = lazy(() => import("../features/auth/presentation/screens/VerificationScreen.jsx"));
+const SetNewPasswordScreen = lazy(() => import("../features/auth/presentation/screens/SetNewPasswordScreen.jsx"));
+const DashboardScreen = lazy(() => import("../features/dashboard/presentation/screens/DashboardScreen.jsx"));
+const CoursesScreen = lazy(() => import("../features/courses/presentation/screens/CoursesScreen.jsx"));
+const JobsScreen = lazy(() => import("../features/jobs/presentation/screens/JobsScreen.jsx"));
+const ProfileScreen = lazy(() => import("../features/profile/presentation/screens/ProfileScreen.jsx"));
+const CvManagerScreen = lazy(() => import("../features/cv/presentation/screens/CvManagerScreen.jsx"));
+const ChatbotScreen = lazy(() => import("../features/chatbot/presentation/screens/ChatbotScreen.jsx"));
+const CareerPathsScreen = lazy(() => import("../features/careerPath/presentation/screens/CareerPathsScreen.jsx"));
+const CategoriesManagerScreen = lazy(() => import("../features/courses/presentation/screens/CategoriesManagerScreen.jsx"));
+const PlatformManagerScreen = lazy(() => import("../features/courses/presentation/screens/PlatformManagerScreen.jsx"));
+const MyLearningScreen = lazy(() => import("../features/courses/presentation/screens/MyLearningScreen.jsx"));
+const MyJobApplicationsScreen = lazy(() => import("../features/jobs/presentation/screens/MyJobApplicationsScreen.jsx"));
+const JobSourcesManagerScreen = lazy(() => import("../features/jobs/presentation/screens/JobSourcesManagerScreen.jsx"));
+const SavedScreen = lazy(() => import("../features/dashboard/presentation/screens/SavedScreen.jsx"));
+const CareerMatchScreen = lazy(() => import("../features/careerMatch/presentation/screens/CareerMatchScreen.jsx"));
+const MyCareerPathsScreen = lazy(() => import("../features/careerPath/presentation/screens/MyCareerPathsScreen.jsx"));
+const CareerPathDetailsScreen = lazy(() => import("../features/careerPath/presentation/screens/CareerPathDetailsScreen.jsx"));
+const OnboardingScreen = lazy(() => import("../features/auth/presentation/screens/OnboardingScreen.jsx"));
+const CareerPathsManager = lazy(() => import("../features/admin/presentation/screens/CareerPathsManager.jsx"));
+const CategoriesManager = lazy(() => import("../features/admin/presentation/screens/CategoriesManager.jsx"));
+const CoursesManager = lazy(() => import("../features/admin/presentation/screens/CoursesManager.jsx"));
+const PlatformsManager = lazy(() => import("../features/admin/presentation/screens/PlatformsManager.jsx"));
+const JobSourcesManager = lazy(() => import("../features/admin/presentation/screens/JobSourcesManager.jsx"));
+const JobsManager = lazy(() => import("../features/admin/presentation/screens/JobsManager.jsx"));
+const GlobalSkillsManager = lazy(() => import("../features/admin/presentation/screens/GlobalSkillsManager.jsx"));
+const AdminProfileManager = lazy(() => import("../features/admin/presentation/screens/AdminProfileManager.jsx"));
+
+// ── Static Layouts (Keep static for layout stability) ──
 import DashboardLayout from "../core/ui_components/Layout/DashboardLayout.jsx";
-import LoginScreen from "../features/auth/presentation/screens/LoginScreen.jsx";
-import SignUpScreen from "../features/auth/presentation/screens/SignUpScreen.jsx";
-import RecoverPasswordScreen from "../features/auth/presentation/screens/RecoverPasswordScreen.jsx";
-import VerificationScreen from "../features/auth/presentation/screens/VerificationScreen.jsx";
-import SetNewPasswordScreen from "../features/auth/presentation/screens/SetNewPasswordScreen.jsx";
-import DashboardScreen from "../features/dashboard/presentation/screens/DashboardScreen.jsx";
-import CoursesScreen from "../features/courses/presentation/screens/CoursesScreen.jsx";
-import JobsScreen from "../features/jobs/presentation/screens/JobsScreen.jsx";
-import ProfileScreen from "../features/profile/presentation/screens/ProfileScreen.jsx";
-import CvManagerScreen from "../features/cv/presentation/screens/CvManagerScreen.jsx";
-import ChatbotScreen from "../features/chatbot/presentation/screens/ChatbotScreen.jsx";
-import CareerPathsScreen from "../features/careerPath/presentation/screens/CareerPathsScreen.jsx";
-import CategoriesManagerScreen from "../features/courses/presentation/screens/CategoriesManagerScreen.jsx";
-import PlatformManagerScreen from "../features/courses/presentation/screens/PlatformManagerScreen.jsx";
-import MyLearningScreen from "../features/courses/presentation/screens/MyLearningScreen.jsx";
-import MyJobApplicationsScreen from "../features/jobs/presentation/screens/MyJobApplicationsScreen.jsx";
-import JobSourcesManagerScreen from "../features/jobs/presentation/screens/JobSourcesManagerScreen.jsx";
-import SavedScreen from "../features/dashboard/presentation/screens/SavedScreen.jsx";
-import CareerMatchScreen from "../features/careerMatch/presentation/screens/CareerMatchScreen.jsx";
-import MyCareerPathsScreen from "../features/careerPath/presentation/screens/MyCareerPathsScreen.jsx";
-import CareerPathDetailsScreen from "../features/careerPath/presentation/screens/CareerPathDetailsScreen.jsx";
-import OnboardingScreen from "../features/auth/presentation/screens/OnboardingScreen.jsx";
 import AdminLayout from "../features/admin/presentation/components/AdminLayout.jsx";
-import CareerPathsManager from "../features/admin/presentation/screens/CareerPathsManager.jsx";
-import CategoriesManager from "../features/admin/presentation/screens/CategoriesManager.jsx";
-import CoursesManager from "../features/admin/presentation/screens/CoursesManager.jsx";
-import PlatformsManager from "../features/admin/presentation/screens/PlatformsManager.jsx";
-import JobSourcesManager from "../features/admin/presentation/screens/JobSourcesManager.jsx";
-import GlobalSkillsManager from "../features/admin/presentation/screens/GlobalSkillsManager.jsx";
-import AdminProfileManager from "../features/admin/presentation/screens/AdminProfileManager.jsx";
+
+const PageLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-slate-950/20 backdrop-blur-xl z-50">
+    <div className="flex flex-col items-center gap-6">
+       <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin shadow-glass" />
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary animate-pulse">Initializing Interface...</p>
+    </div>
+  </div>
+);
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -54,7 +67,7 @@ const AdminRoute = ({ children }) => {
 
 const AdminComingSoon = ({ title }) => (
   <div className="rounded-[2rem] border border-slate-200 bg-white p-10">
-    <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#5b7cfa]">
+    <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[var(--color-primary)]">
       Admin Module
     </p>
     <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
@@ -71,10 +84,11 @@ const AppRoutes = () => {
     localStorage.getItem("hasCompletedOnboarding") === "true";
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route
+          path="/"
+          element={
           <Navigate
             to={hasCompletedOnboarding ? "/login" : "/onboarding"}
             replace
@@ -162,6 +176,7 @@ const AppRoutes = () => {
         <Route path="categories" element={<CategoriesManager />} />
         <Route path="courses" element={<CoursesManager />} />
         <Route path="platforms" element={<PlatformsManager />} />
+        <Route path="jobs" element={<JobsManager />} />
         <Route path="job-sources" element={<JobSourcesManager />} />
         <Route path="skills" element={<GlobalSkillsManager />} />
         <Route path="profile" element={<AdminProfileManager />} />
@@ -303,7 +318,8 @@ const AppRoutes = () => {
         path="*"
         element={<div className="text-center p-20">404 - Page Not Found</div>}
       />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 };
 

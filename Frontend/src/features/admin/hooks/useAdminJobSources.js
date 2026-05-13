@@ -27,7 +27,7 @@ export const useAdminJobSources = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await adminService.jobSources.getAll();
+      const data = await adminService.jobSources.getAll({ onlyActive: false });
       setJobSources(toArray(data));
       return true;
     } catch (err) {

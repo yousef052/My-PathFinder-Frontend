@@ -7,7 +7,6 @@ const emptyPathForm = {
   difficultyLevel: "Beginner",
   durationInMonths: 1,
   categoryId: 0,
-  subCategoryId: 0,
 };
 
 const emptyPathCourseForm = {
@@ -17,61 +16,155 @@ const emptyPathCourseForm = {
   completionCriteria: "Complete the course",
 };
 
-const Field = ({ label, children }) => (
+// ─── Primitive UI Components ──────────────────────────────────────────────────
+const inputCls =
+  "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition duration-200 focus:border-[var(--color-primary)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(91,124,250,0.08)]";
+
+const Field = ({ label, required, children }) => (
   <label className="block">
     <span className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-slate-500">
-      {label}
+      {label}{required && <span className="ml-0.5 text-red-400">*</span>}
     </span>
     {children}
   </label>
 );
 
-const inputClass =
-  "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-[#5b7cfa] focus:bg-white";
-
-const PrimaryButton = ({ children, type = "button", onClick, disabled }) => (
+const PrimaryBtn = ({ children, type = "button", onClick, disabled, className = "" }) => (
   <button
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className="inline-flex items-center justify-center rounded-2xl bg-[#5b7cfa] px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-blue-100 transition hover:bg-[#3652d9] disabled:cursor-not-allowed disabled:opacity-60"
+    className={`inline-flex items-center justify-center rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-blue-100 transition duration-200 hover:bg-[var(--color-primary-hover)] hover:shadow-blue-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
   >
     {children}
   </button>
 );
 
-const GhostButton = ({ children, type = "button", onClick, disabled }) => (
+const GhostBtn = ({ children, type = "button", onClick, disabled, className = "" }) => (
   <button
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-[#5b7cfa] hover:text-[#5b7cfa] disabled:cursor-not-allowed disabled:opacity-60"
+    className={`inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-500 transition duration-200 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] active:scale-95 disabled:opacity-50 ${className}`}
   >
     {children}
   </button>
 );
 
-const Spinner = () => (
-  <div className="flex items-center justify-center py-16">
-    <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#5b7cfa]" />
+// ─── Skeleton Loaders ────────────────────────────────────────────────────────
+const SkeletonPathCard = ({ delay = 0 }) => (
+  <div
+    className="flex flex-col rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm"
+    style={{ animation: `fadeSlideUp 0.4s ease both ${delay}ms` }}
+  >
+    <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="h-12 w-12 animate-pulse rounded-2xl bg-slate-100" />
+      <div className="h-5 w-20 animate-pulse rounded-lg bg-slate-100" />
+    </div>
+    <div className="space-y-2">
+      <div className="h-5 w-3/4 animate-pulse rounded-lg bg-slate-100" />
+      <div className="h-3 w-1/2 animate-pulse rounded-lg bg-slate-100" />
+    </div>
+    <div className="mt-6 flex gap-2">
+      <div className="h-8 w-24 animate-pulse rounded-xl bg-slate-100" />
+      <div className="h-8 w-16 animate-pulse rounded-xl bg-slate-100" />
+    </div>
   </div>
 );
 
-const EmptyState = ({ title, message }) => (
-  <div className="rounded-[2rem] border border-dashed border-slate-200 bg-white px-6 py-16 text-center">
-    <h3 className="text-lg font-black text-slate-700">{title}</h3>
-    <p className="mt-2 text-sm font-medium text-slate-400">{message}</p>
+const StatCard = ({ label, value, icon, color = "bg-blue-50 text-[var(--color-primary)]", delay = 0 }) => (
+  <div
+    className="flex items-center gap-4 rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
+    style={{ animation: `fadeSlideUp 0.4s ease both ${delay}ms` }}
+  >
+    <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl text-lg ${color}`}>
+      {icon}
+    </div>
+    <div>
+      <p className="text-2xl font-black text-slate-900">{value}</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+    </div>
   </div>
 );
 
-const PathModal = ({
-  isOpen,
-  initialValue,
-  isSaving,
-  onClose,
-  onSubmit,
-  categories,
-}) => {
+// ─── Career Path Card ─────────────────────────────────────────────────────────
+const CareerPathCard = ({ path, categories, onEdit, onDelete, onCourses, isSaving, delay = 0 }) => {
+  const name = path.careerPathName || path.name || path.Name || "Untitled Path";
+  const catName = categories.find(c => c.id === path.categoryId)?.name || path.categoryName || "Uncategorized";
+  
+  return (
+    <article
+      className="group relative flex flex-col overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)]/20 hover:shadow-xl hover:shadow-blue-50/70"
+      style={{ animation: `fadeSlideUp 0.45s cubic-bezier(0.16,1,0.3,1) both ${delay}ms` }}
+    >
+      <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-[2.5rem] bg-gradient-to-r from-[var(--color-primary)] to-[#a78bfa] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 text-2xl shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+          🚀
+        </div>
+        <div className="text-right">
+          <span className="inline-block rounded-xl bg-slate-50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-[var(--color-primary)] border border-slate-100">
+            {path.difficultyLevel || "Beginner"}
+          </span>
+          <p className="mt-1.5 text-[10px] font-bold text-slate-400">
+            {path.durationInMonths || 1} Month{path.durationInMonths !== 1 ? 's' : ''}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex-1">
+        <h3 className="text-lg font-black leading-snug text-slate-900 line-clamp-2" title={name}>
+          {name}
+        </h3>
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          {catName}
+        </p>
+
+        <p className="mt-4 text-xs font-medium leading-relaxed text-slate-500 line-clamp-3">
+          {path.description || "No description provided for this career path."}
+        </p>
+      </div>
+
+      <div className="mt-6 flex items-center justify-between border-t border-slate-50 pt-5">
+        <div className="flex items-center gap-1.5">
+           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[10px]">📚</span>
+           <span className="text-[11px] font-black text-slate-600">{path.estimatedCoursesCount || 0} Modules</span>
+        </div>
+        
+        <div className="flex gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={() => onCourses(path)}
+            className="flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)] transition hover:bg-[var(--color-primary)] hover:text-white active:scale-95"
+          >
+            Modules
+          </button>
+          <button
+            type="button"
+            onClick={() => onEdit(path)}
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition hover:bg-[var(--color-primary)] hover:text-white active:scale-95"
+            title="Edit"
+          >
+            ✏️
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(path)}
+            disabled={isSaving}
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-50 text-red-500 transition hover:bg-red-500 hover:text-white active:scale-95 disabled:opacity-40"
+            title="Delete"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+// ─── Path Modal ───────────────────────────────────────────────────────────────
+const PathModal = ({ isOpen, initialValue, isSaving, onClose, onSubmit, categories }) => {
   const [formData, setFormData] = useState(emptyPathForm);
 
   useEffect(() => {
@@ -84,10 +177,7 @@ const PathModal = ({
     const { name, value } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name.includes("Id") || name === "durationInMonths"
-          ? Number(value)
-          : value,
+      [name]: name.includes("Id") || name === "durationInMonths" ? Number(value) : value,
     }));
   };
 
@@ -97,123 +187,59 @@ const PathModal = ({
     if (success) onClose();
   };
 
-  const subcategories = useMemo(() => {
-    if (!formData.categoryId) return [];
-    const cat = categories.find((c) => c.id === formData.categoryId);
-    return cat?.subCategories || cat?.subcategories || [];
-  }, [formData.categoryId, categories]);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
+      <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative w-full max-w-xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl" style={{ animation: "slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
+        <div className="h-1 w-full bg-gradient-to-r from-[var(--color-primary)] via-[#818cf8] to-[#a78bfa]" />
+
+        <div className="flex items-center justify-between border-b border-slate-100 px-7 py-5">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#5b7cfa]">
-              Career Path
-            </p>
-            <h2 className="text-xl font-black text-slate-900">
-              {initialValue?.id ? "Edit path" : "Create path"}
-            </h2>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)]">Career Path</p>
+            <h2 className="text-xl font-black text-slate-900">{initialValue?.id ? "Edit Path" : "Create Path"}</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl px-3 py-2 text-sm font-black text-slate-400 hover:bg-slate-50 hover:text-red-500"
-          >
-            Close
-          </button>
+          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:scale-90">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
-          <Field label="Path name">
-            <input
-              name="careerPathName"
-              value={formData.careerPathName}
-              onChange={updateField}
-              className={inputClass}
-              required
-            />
-          </Field>
-
-          <Field label="Description">
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={updateField}
-              className={`${inputClass} min-h-28 resize-none`}
-              required
-            />
-          </Field>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Difficulty">
-              <select
-                name="difficultyLevel"
-                value={formData.difficultyLevel}
-                onChange={updateField}
-                className={inputClass}
-              >
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
-              </select>
+        <form onSubmit={handleSubmit} className="flex max-h-[80vh] flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-7 space-y-5">
+            <Field label="Path Name" required>
+              <input name="careerPathName" value={formData.careerPathName} onChange={updateField} className={inputCls} required />
             </Field>
-            <Field label="Duration months">
-              <input
-                type="number"
-                min="1"
-                name="durationInMonths"
-                value={formData.durationInMonths}
-                onChange={updateField}
-                className={inputClass}
-                required
-              />
-            </Field>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Category">
-              <select
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={updateField}
-                className={inputClass}
-                required
-              >
-                <option value={0}>Select Category</option>
+            <Field label="Description" required>
+              <textarea name="description" value={formData.description} onChange={updateField} className={`${inputCls} min-h-[100px] resize-none`} required />
+            </Field>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Difficulty Level" required>
+                <select name="difficultyLevel" value={formData.difficultyLevel} onChange={updateField} className={inputCls} required>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </Field>
+              <Field label="Duration (Months)" required>
+                <input type="number" min="1" name="durationInMonths" value={formData.durationInMonths} onChange={updateField} className={inputCls} required />
+              </Field>
+            </div>
+
+            <Field label="Category" required>
+              <select name="categoryId" value={formData.categoryId} onChange={updateField} className={inputCls} required>
+                <option value={0}>Select Category...</option>
                 {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label="Subcategory">
-              <select
-                name="subCategoryId"
-                value={formData.subCategoryId}
-                onChange={updateField}
-                className={inputClass}
-                disabled={!formData.categoryId}
-              >
-                <option value={0}>Select Subcategory</option>
-                {subcategories.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.name}
-                  </option>
+                  <option key={cat.id} value={cat.id}>{cat.name || cat.categoryName}</option>
                 ))}
               </select>
             </Field>
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-            <GhostButton onClick={onClose} disabled={isSaving}>
-              Cancel
-            </GhostButton>
-            <PrimaryButton type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save"}
-            </PrimaryButton>
+          <div className="flex justify-end gap-3 border-t border-slate-100 p-6 bg-slate-50/50">
+            <GhostBtn onClick={onClose} disabled={isSaving}>Cancel</GhostBtn>
+            <PrimaryBtn type="submit" disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Path"}
+            </PrimaryBtn>
           </div>
         </form>
       </div>
@@ -221,17 +247,8 @@ const PathModal = ({
   );
 };
 
-const LinkedCoursesModal = ({
-  isOpen,
-  careerPath,
-  pathCourses,
-  allCourses,
-  isLoading,
-  isSaving,
-  onClose,
-  onLink,
-  onUnlink,
-}) => {
+// ─── Linked Courses Sub-Modal ──────────────────────────────────────────────────
+const LinkedCoursesModal = ({ isOpen, careerPath, pathCourses, allCourses, isLoading, isSaving, onClose, onLink, onUnlink }) => {
   const [formData, setFormData] = useState(emptyPathCourseForm);
 
   useEffect(() => {
@@ -244,12 +261,7 @@ const LinkedCoursesModal = ({
     const { name, type, checked, value } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : name === "courseId" || name === "orderNumber"
-            ? Number(value)
-            : value,
+      [name]: type === "checkbox" ? checked : name === "courseId" || name === "orderNumber" ? Number(value) : value,
     }));
   };
 
@@ -260,140 +272,100 @@ const LinkedCoursesModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
+      <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md" onClick={onClose} />
+
+      <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl" style={{ animation: "slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
+        
+        <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#5b7cfa]">
-              Linked courses
-            </p>
-            <h2 className="text-xl font-black text-slate-900">
-              {careerPath.careerPathName || careerPath.name}
-            </h2>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)]">Path Modules Builder</p>
+            <h2 className="text-2xl font-black text-slate-900">{careerPath.careerPathName || careerPath.name}</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl px-3 py-2 text-sm font-black text-slate-400 hover:bg-slate-50 hover:text-red-500"
-          >
-            Close
-          </button>
+          <button type="button" onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:scale-90">✕</button>
         </div>
 
-        <div className="grid gap-6 overflow-y-auto p-6 lg:grid-cols-[360px_1fr]">
-          <form
-            onSubmit={handleSubmit}
-            className="h-fit space-y-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5"
-          >
-            <h3 className="font-black text-slate-800">Attach a course</h3>
-            <Field label="Select Course">
-              <select
-                name="courseId"
-                value={formData.courseId}
-                onChange={updateField}
-                className={inputClass}
-                required
-              >
-                <option value={0}>Select a course...</option>
-                {allCourses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Order number">
-              <input
-                type="number"
-                min="1"
-                name="orderNumber"
-                value={formData.orderNumber}
-                onChange={updateField}
-                className={inputClass}
-                required
-              />
-            </Field>
-            <Field label="Completion criteria">
-              <input
-                name="completionCriteria"
-                value={formData.completionCriteria}
-                onChange={updateField}
-                className={inputClass}
-                required
-              />
-            </Field>
-            <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600">
-              <input
-                type="checkbox"
-                name="isRequired"
-                checked={formData.isRequired}
-                onChange={updateField}
-                className="h-4 w-4"
-              />
-              Required course
-            </label>
-            <PrimaryButton type="submit" disabled={isSaving || !formData.courseId}>
-              {isSaving ? "Linking..." : "Link Course"}
-            </PrimaryButton>
-          </form>
+        <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+          {/* Left Side: Form */}
+          <div className="w-full lg:w-[400px] border-b lg:border-b-0 lg:border-r border-slate-100 bg-slate-50/50 p-8 overflow-y-auto">
+            <h3 className="mb-6 text-base font-black text-slate-800">Attach a Module</h3>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <Field label="Select Course" required>
+                <select name="courseId" value={formData.courseId} onChange={updateField} className={inputCls} required>
+                  <option value={0}>Select a course to attach...</option>
+                  {allCourses.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name || c.title || c.courseName || `Course #${c.id}`}</option>
+                  ))}
+                </select>
+              </Field>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Sequence Order" required>
+                  <input type="number" min="1" name="orderNumber" value={formData.orderNumber} onChange={updateField} className={inputCls} required />
+                </Field>
+              </div>
+              <Field label="Completion Criteria" required>
+                <input name="completionCriteria" value={formData.completionCriteria} onChange={updateField} className={inputCls} placeholder="e.g. Pass final quiz" required />
+              </Field>
+              
+              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-bold text-slate-700 shadow-sm transition hover:border-[var(--color-primary)]/40 cursor-pointer">
+                <input type="checkbox" name="isRequired" checked={formData.isRequired} onChange={updateField} className="h-5 w-5 rounded border-slate-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" />
+                This is a required module
+              </label>
 
-          <div className="min-w-0">
+              <div className="pt-4">
+                <PrimaryBtn type="submit" disabled={isSaving || !formData.courseId} className="w-full">
+                  {isSaving ? "Linking..." : "+ Link Course to Path"}
+                </PrimaryBtn>
+              </div>
+            </form>
+          </div>
+
+          {/* Right Side: List */}
+          <div className="flex-1 overflow-y-auto bg-white p-8">
+            <h3 className="mb-6 text-base font-black text-slate-800">Current Modules ({pathCourses.length})</h3>
+            
             {isLoading ? (
-              <Spinner />
+              <div className="space-y-4">
+                {[...Array(4)].map((_, i) => (
+                   <div key={i} className="h-24 animate-pulse rounded-[1.5rem] bg-slate-100" />
+                ))}
+              </div>
             ) : pathCourses.length === 0 ? (
-              <EmptyState
-                title="No linked courses"
-                message="Attach courses by name to build this path sequence."
-              />
+              <div className="flex h-64 flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+                 <span className="mb-3 text-4xl text-slate-300">🧩</span>
+                 <p className="text-sm font-bold text-slate-400">No courses attached yet.</p>
+              </div>
             ) : (
-              <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white">
-                <table className="w-full min-w-[620px] text-left text-sm">
-                  <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <tr>
-                      <th className="px-5 py-4">Order</th>
-                      <th className="px-5 py-4">Course</th>
-                      <th className="px-5 py-4">Required</th>
-                      <th className="px-5 py-4">Criteria</th>
-                      <th className="px-5 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {pathCourses.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-50/80">
-                        <td className="px-5 py-4 font-black text-slate-900">
-                          {item.orderNumber ?? "-"}
-                        </td>
-                        <td className="px-5 py-4 font-bold text-slate-600">
-                          {item.courseName || `Course #${item.courseId}`}
-                        </td>
-                        <td className="px-5 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
-                              item.isRequired
-                                ? "bg-red-50 text-red-600"
-                                : "bg-emerald-50 text-emerald-600"
-                            }`}
-                          >
-                            {item.isRequired ? "Required" : "Optional"}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-slate-500">
-                          {item.completionCriteria || "-"}
-                        </td>
-                        <td className="px-5 py-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => onUnlink(item.id)}
-                            className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50"
-                            disabled={isSaving}
-                          >
-                            Remove
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-4">
+                {pathCourses.sort((a, b) => (a.orderNumber || 0) - (b.orderNumber || 0)).map((item, i) => (
+                  <div key={item.id} className="group flex items-center justify-between gap-4 rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-sm transition hover:border-[var(--color-primary)]/20 hover:shadow-md" style={{ animation: `fadeSlideUp 0.3s ease both ${i * 30}ms` }}>
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-50 font-black text-slate-400 group-hover:bg-blue-50 group-hover:text-[var(--color-primary)]">
+                      {item.orderNumber ?? i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate font-black text-slate-900">
+                        {item.courseName || `Course #${item.courseId}`}
+                      </p>
+                      <div className="mt-1 flex gap-2">
+                        {item.isRequired ? (
+                           <span className="rounded-lg bg-red-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-red-600">Required</span>
+                        ) : (
+                           <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-600">Optional</span>
+                        )}
+                        <span className="truncate text-xs font-medium text-slate-500">• {item.completionCriteria || "Complete course"}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onUnlink(item.id)}
+                      disabled={isSaving}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-500 opacity-0 transition hover:bg-red-500 hover:text-white group-hover:opacity-100 disabled:opacity-0"
+                      title="Remove from path"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -403,6 +375,7 @@ const LinkedCoursesModal = ({
   );
 };
 
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 const CareerPathsManager = () => {
   const {
     careerPaths,
@@ -460,7 +433,6 @@ const CareerPathsManager = () => {
       difficultyLevel: path.difficultyLevel || "Beginner",
       durationInMonths: path.durationInMonths || 1,
       categoryId: path.categoryId || 0,
-      subCategoryId: path.subCategoryId || path.subcategoryId || 0,
     });
     setIsPathModalOpen(true);
   };
@@ -485,165 +457,116 @@ const CareerPathsManager = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#5b7cfa]">
-            Admin Module
-          </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
-            Career Paths
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm font-medium text-slate-500">
-            Create, update, search, delete, and attach courses to platform
-            learning paths.
-          </p>
-        </div>
-        <PrimaryButton onClick={openCreateModal}>New Career Path</PrimaryButton>
-      </div>
+    <>
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(24px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0)     scale(1);    }
+        }
+      `}</style>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Total paths
-          </p>
-          <p className="mt-2 text-3xl font-black text-slate-900">
-            {stats.total}
-          </p>
-        </div>
-        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Beginner
-          </p>
-          <p className="mt-2 text-3xl font-black text-slate-900">
-            {stats.beginner}
-          </p>
-        </div>
-        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Advanced
-          </p>
-          <p className="mt-2 text-3xl font-black text-slate-900">
-            {stats.advanced}
-          </p>
-        </div>
-      </div>
-
-      {error && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm font-bold text-red-600">
-          {error}
-        </div>
-      )}
-
-      <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            fetchCareerPaths(searchTerm);
-          }}
-          className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row"
-        >
-          <input
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search career paths..."
-            className={`${inputClass} md:max-w-md`}
-          />
-          <PrimaryButton type="submit" disabled={isLoading}>
-            Search
-          </PrimaryButton>
-          <GhostButton
-            onClick={() => {
-              setSearchTerm("");
-              fetchCareerPaths();
-            }}
-            disabled={isLoading}
-          >
-            Reset
-          </GhostButton>
-        </form>
-
-        {isLoading ? (
-          <Spinner />
-        ) : sortedPaths.length === 0 ? (
-          <div className="p-6">
-            <EmptyState
-              title="No career paths found"
-              message="Use the create button to add the first path from the API."
-            />
+      <div className="space-y-8 pb-24" style={{ animation: "fadeSlideUp 0.35s ease both" }}>
+        
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--color-primary)]">
+              Admin Module
+            </p>
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
+              Career Paths
+            </h1>
+            <p className="mt-2 max-w-xl text-sm font-medium text-slate-500">
+              Create, manage, and assemble learning paths from modular courses.
+            </p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                <tr>
-                  <th className="px-5 py-4">Path Name</th>
-                  <th className="px-5 py-4">Category / Sub</th>
-                  <th className="px-5 py-4">Stats</th>
-                  <th className="px-5 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {sortedPaths.map((path) => {
-                  const catName = categories.find(c => c.id === path.categoryId)?.name || path.categoryName || "N/A";
-                  const subCatName = categories.find(c => c.id === path.categoryId)?.subCategories?.find(s => s.id === (path.subCategoryId || path.subcategoryId))?.name || path.subCategoryName || "N/A";
-                  
-                  return (
-                  <tr key={path.id} className="hover:bg-slate-50/80">
-                    <td className="px-5 py-4">
-                      <p className="font-black text-slate-900">
-                        {path.careerPathName || path.name || path.Name || "Untitled"}
-                      </p>
-                      <div className="flex gap-2 mt-1">
-                         <span className="text-[9px] font-black uppercase text-[#5b7cfa]">{path.difficultyLevel || "-"}</span>
-                         <span className="text-[9px] font-bold text-slate-300">•</span>
-                         <span className="text-[9px] font-bold text-slate-400">{path.durationInMonths ?? "-"} months</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                       <div className="flex flex-col">
-                          <span className="text-xs font-black text-slate-700">{catName}</span>
-                          <span className="text-[10px] font-bold text-slate-400 italic">{subCatName}</span>
-                       </div>
-                    </td>
-                    <td className="px-5 py-4">
-                       <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-100">
-                          {path.estimatedCoursesCount || 0} Modules
-                       </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openCoursesModal(path)}
-                          className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-[#5b7cfa] hover:bg-blue-50"
-                        >
-                          Courses
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(path)}
-                          className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(path)}
-                          className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50"
-                          disabled={isSaving}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )})}
-              </tbody>
-            </table>
+          <PrimaryBtn onClick={openCreateModal}>
+            + New Career Path
+          </PrimaryBtn>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <StatCard label="Total Paths" value={stats.total} icon="🚀" delay={0} />
+          <StatCard label="Beginner" value={stats.beginner} icon="🌱" color="bg-emerald-50 text-emerald-500" delay={40} />
+          <StatCard label="Intermediate" value={stats.intermediate || 0} icon="⭐" color="bg-amber-50 text-amber-500" delay={80} />
+          <StatCard label="Advanced" value={stats.advanced} icon="🔥" color="bg-red-50 text-red-500" delay={120} />
+        </div>
+
+        {error && (
+          <div className="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm font-bold text-red-600" style={{ animation: "fadeSlideUp 0.3s ease both" }}>
+            <span className="text-lg">⚠️</span> {error}
           </div>
         )}
-      </section>
+
+        {/* Search */}
+        <div className="flex flex-wrap items-center gap-3 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
+          <form
+            onSubmit={(e) => { e.preventDefault(); fetchCareerPaths(searchTerm); }}
+            className="flex w-full items-center gap-3"
+          >
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search career paths..."
+              className="min-w-[200px] flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-700 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
+            />
+            <GhostBtn type="submit" disabled={isLoading}>Search API</GhostBtn>
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => { setSearchTerm(""); fetchCareerPaths(""); }}
+                className="px-3 text-xs font-bold text-slate-400 hover:text-slate-700"
+              >
+                Clear
+              </button>
+            )}
+          </form>
+        </div>
+
+        {/* Grid List */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(6)].map((_, i) => <SkeletonPathCard key={i} delay={i * 50} />)}
+          </div>
+        ) : sortedPaths.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-dashed border-slate-200 bg-white px-6 py-24 text-center" style={{ animation: "fadeSlideUp 0.4s ease both" }}>
+             <span className="mb-4 text-5xl">🚀</span>
+            <h3 className="text-lg font-black text-slate-700">No career paths found</h3>
+            <p className="mt-2 text-sm font-medium text-slate-400">Design your first learning path sequence.</p>
+            <div className="mt-6">
+              <PrimaryBtn onClick={openCreateModal}>+ Create First Path</PrimaryBtn>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400" style={{ animation: "fadeSlideUp 0.3s ease both" }}>
+              Showing {sortedPaths.length} path{sortedPaths.length !== 1 ? "s" : ""}
+            </p>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {sortedPaths.map((path, i) => (
+                <CareerPathCard
+                  key={path.id}
+                  path={path}
+                  categories={categories}
+                  onEdit={openEditModal}
+                  onDelete={handleDelete}
+                  onCourses={openCoursesModal}
+                  isSaving={isSaving}
+                  delay={i * 40}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       <PathModal
         isOpen={isPathModalOpen}
@@ -653,6 +576,7 @@ const CareerPathsManager = () => {
         onSubmit={handleSave}
         categories={categories}
       />
+      
       <LinkedCoursesModal
         isOpen={isCoursesModalOpen}
         careerPath={selectedCareerPath}
@@ -664,7 +588,7 @@ const CareerPathsManager = () => {
         onLink={linkCourseToPath}
         onUnlink={unlinkCourseFromPath}
       />
-    </div>
+    </>
   );
 };
 

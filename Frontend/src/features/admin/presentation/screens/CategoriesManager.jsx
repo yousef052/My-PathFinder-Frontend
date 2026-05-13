@@ -4,53 +4,87 @@ import { useAdminCategories } from "../../hooks/useAdminCategories";
 const emptyCategoryForm = { name: "" };
 const emptySubcategoryForm = { name: "", categoryId: 0 };
 
-const Field = ({ label, children }) => (
+// ─── Primitive UI Components ──────────────────────────────────────────────────
+const inputCls =
+  "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition duration-200 focus:border-[var(--color-primary)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(91,124,250,0.08)]";
+
+const Field = ({ label, required, children }) => (
   <label className="block">
     <span className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-slate-500">
-      {label}
+      {label}{required && <span className="ml-0.5 text-red-400">*</span>}
     </span>
     {children}
   </label>
 );
 
-const inputClass =
-  "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-[#5b7cfa] focus:bg-white";
-
-const PrimaryButton = ({ children, type = "button", onClick, disabled }) => (
+const PrimaryBtn = ({ children, type = "button", onClick, disabled, small, className = "" }) => (
   <button
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className="inline-flex items-center justify-center rounded-2xl bg-[#5b7cfa] px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-blue-100 transition hover:bg-[#3652d9] disabled:cursor-not-allowed disabled:opacity-60"
+    className={`inline-flex items-center justify-center rounded-2xl bg-[var(--color-primary)] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-100 transition duration-200 hover:bg-[var(--color-primary-hover)] hover:shadow-blue-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${small ? "px-4 py-2 text-[10px]" : "px-5 py-3 text-xs"} ${className}`}
   >
     {children}
   </button>
 );
 
-const GhostButton = ({ children, type = "button", onClick, disabled }) => (
+const GhostBtn = ({ children, type = "button", onClick, disabled, small, className = "" }) => (
   <button
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-[#5b7cfa] hover:text-[#5b7cfa] disabled:cursor-not-allowed disabled:opacity-60"
+    className={`inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white font-black uppercase tracking-widest text-slate-500 transition duration-200 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] active:scale-95 disabled:opacity-50 ${small ? "px-4 py-2 text-[10px]" : "px-5 py-3 text-xs"} ${className}`}
   >
     {children}
   </button>
 );
 
-const Spinner = () => (
-  <div className="flex items-center justify-center py-16">
-    <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#5b7cfa]" />
+// ─── Skeleton Loaders ────────────────────────────────────────────────────────
+const SkeletonCategoryCard = ({ delay = 0 }) => (
+  <div
+    className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm"
+    style={{ animation: `fadeSlideUp 0.4s ease both ${delay}ms` }}
+  >
+    <div className="flex items-start gap-4">
+      <div className="h-10 w-10 animate-pulse rounded-2xl bg-slate-100" />
+      <div className="flex-1 space-y-2 py-1">
+        <div className="h-4 w-3/4 animate-pulse rounded-lg bg-slate-100" />
+        <div className="h-3 w-1/2 animate-pulse rounded-lg bg-slate-100" />
+      </div>
+    </div>
   </div>
 );
 
-const EmptyState = ({ title, message }) => (
-  <div className="rounded-[2rem] border border-dashed border-slate-200 bg-white px-6 py-16 text-center">
-    <h3 className="text-lg font-black text-slate-700">{title}</h3>
-    <p className="mt-2 text-sm font-medium text-slate-400">{message}</p>
+const SkeletonSubcategoryRow = ({ delay = 0 }) => (
+  <div
+    className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+    style={{ animation: `fadeSlideUp 0.3s ease both ${delay}ms` }}
+  >
+    <div className="space-y-2">
+      <div className="h-4 w-32 animate-pulse rounded-lg bg-slate-100" />
+      <div className="h-3 w-16 animate-pulse rounded-lg bg-slate-100" />
+    </div>
+    <div className="h-8 w-16 animate-pulse rounded-xl bg-slate-100" />
   </div>
 );
 
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+const StatCard = ({ label, value, icon, color = "bg-blue-50 text-[var(--color-primary)]", delay = 0 }) => (
+  <div
+    className="flex items-center gap-4 rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition duration-200 hover:shadow-md"
+    style={{ animation: `fadeSlideUp 0.4s ease both ${delay}ms` }}
+  >
+    <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl text-lg ${color}`}>
+      {icon}
+    </div>
+    <div>
+      <p className="text-2xl font-black text-slate-900">{value}</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+    </div>
+  </div>
+);
+
+// ─── Entity Modal ─────────────────────────────────────────────────────────────
 const EntityModal = ({
   isOpen,
   title,
@@ -59,6 +93,7 @@ const EntityModal = ({
   onClose,
   onSubmit,
   includeCategoryId = false,
+  categories = [],
 }) => {
   const [formData, setFormData] = useState(
     includeCategoryId ? emptySubcategoryForm : emptyCategoryForm,
@@ -88,56 +123,48 @@ const EntityModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden rounded-[2rem] bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ animation: "fadeIn 0.2s ease both" }}>
+      <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative w-full max-w-md overflow-hidden rounded-[2.5rem] bg-white shadow-2xl" style={{ animation: "slideUp 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
+        <div className="h-1 w-full bg-gradient-to-r from-[var(--color-primary)] via-[#818cf8] to-[#a78bfa]" />
+
+        <div className="flex items-center justify-between border-b border-slate-100 px-7 py-5">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#5b7cfa]">
-              Taxonomy
-            </p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)]">Taxonomy</p>
             <h2 className="text-xl font-black text-slate-900">{title}</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl px-3 py-2 text-sm font-black text-slate-400 hover:bg-slate-50 hover:text-red-500"
-          >
-            Close
-          </button>
+          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-red-50 hover:text-red-500 active:scale-90">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
-          <Field label="Name">
-            <input
-              name="name"
-              value={formData.name}
-              onChange={updateField}
-              className={inputClass}
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-5 px-7 py-6">
+          <Field label="Name" required>
+            <input name="name" value={formData.name} onChange={updateField} className={inputCls} required autoFocus />
           </Field>
 
           {includeCategoryId && (
-            <Field label="Category ID">
-              <input
-                type="number"
-                min="1"
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={updateField}
-                className={inputClass}
-                required
-              />
+            <Field label="Parent Category" required>
+              <select name="categoryId" value={formData.categoryId} onChange={updateField} className={inputCls} required>
+                <option value={0}>Select Category...</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name || cat.categoryName}
+                  </option>
+                ))}
+              </select>
             </Field>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-            <GhostButton onClick={onClose} disabled={isSaving}>
-              Cancel
-            </GhostButton>
-            <PrimaryButton type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save"}
-            </PrimaryButton>
+          <div className="flex justify-end gap-3 border-t border-slate-100 pt-5 mt-5">
+            <GhostBtn onClick={onClose} disabled={isSaving}>Cancel</GhostBtn>
+            <PrimaryBtn type="submit" disabled={isSaving}>
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  Saving...
+                </span>
+              ) : "Save Entity"}
+            </PrimaryBtn>
           </div>
         </form>
       </div>
@@ -145,6 +172,7 @@ const EntityModal = ({
   );
 };
 
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 const CategoriesManager = () => {
   const {
     categories,
@@ -166,14 +194,8 @@ const CategoriesManager = () => {
 
   const fileInputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryModal, setCategoryModal] = useState({
-    isOpen: false,
-    item: null,
-  });
-  const [subcategoryModal, setSubcategoryModal] = useState({
-    isOpen: false,
-    item: null,
-  });
+  const [categoryModal, setCategoryModal] = useState({ isOpen: false, item: null });
+  const [subcategoryModal, setSubcategoryModal] = useState({ isOpen: false, item: null });
 
   useEffect(() => {
     fetchCategories();
@@ -182,32 +204,17 @@ const CategoriesManager = () => {
   const visibleCategories = useMemo(() => {
     const needle = searchTerm.trim().toLowerCase();
     if (!needle) return categories || [];
-
     return (categories || []).filter((category) =>
-      (category?.name || category?.categoryName || "")
-        .toLowerCase()
-        .includes(needle),
+      (category?.name || category?.categoryName || "").toLowerCase().includes(needle),
     );
   }, [categories, searchTerm]);
 
-  const openCreateCategory = () =>
-    setCategoryModal({ isOpen: true, item: null });
-
+  const openCreateCategory = () => setCategoryModal({ isOpen: true, item: null });
   const openEditCategory = (category) =>
-    setCategoryModal({
-      isOpen: true,
-      item: {
-        id: category.id,
-        name: category.name || category.categoryName || "",
-      },
-    });
+    setCategoryModal({ isOpen: true, item: { id: category.id, name: category.name || category.categoryName || "" } });
 
   const openCreateSubcategory = () =>
-    setSubcategoryModal({
-      isOpen: true,
-      item: { ...emptySubcategoryForm, categoryId: selectedCategory?.id || 0 },
-    });
-
+    setSubcategoryModal({ isOpen: true, item: { ...emptySubcategoryForm, categoryId: selectedCategory?.id || 0 } });
   const openEditSubcategory = (subcategory) =>
     setSubcategoryModal({
       isOpen: true,
@@ -218,19 +225,12 @@ const CategoriesManager = () => {
       },
     });
 
-  const handleSaveCategory = (payload) =>
-    saveCategory({ name: payload.name }, categoryModal.item?.id);
-
+  const handleSaveCategory = (payload) => saveCategory({ name: payload.name }, categoryModal.item?.id);
   const handleSaveSubcategory = (payload) =>
-    saveSubcategory(
-      {
-        name: payload.name,
-        categoryId: payload.categoryId || selectedCategory?.id,
-      },
-      subcategoryModal.item?.id,
-    );
+    saveSubcategory({ name: payload.name, categoryId: payload.categoryId || selectedCategory?.id }, subcategoryModal.item?.id);
 
-  const handleDeleteCategory = async (category) => {
+  const handleDeleteCategory = async (category, e) => {
+    e.stopPropagation();
     const name = category.name || category.categoryName || `#${category.id}`;
     if (window.confirm(`Delete category "${name}"?`)) {
       await deleteCategory(category.id);
@@ -238,8 +238,7 @@ const CategoriesManager = () => {
   };
 
   const handleDeleteSubcategory = async (subcategory) => {
-    const name =
-      subcategory.name || subcategory.subcategoryName || `#${subcategory.id}`;
+    const name = subcategory.name || subcategory.subcategoryName || `#${subcategory.id}`;
     if (window.confirm(`Delete subcategory "${name}"?`)) {
       await deleteSubcategory(subcategory.id);
     }
@@ -252,247 +251,235 @@ const CategoriesManager = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#5b7cfa]">
-            Admin Module
-          </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
-            Categories
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm font-medium text-slate-500">
-            Manage course categories, subcategories, and JSON taxonomy imports.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json,application/json"
-            onChange={handleImport}
-            className="hidden"
-          />
-          <GhostButton
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isSaving}
-          >
-            Import JSON
-          </GhostButton>
-          <PrimaryButton onClick={openCreateCategory} disabled={isSaving}>
-            New Category
-          </PrimaryButton>
-        </div>
-      </div>
+    <>
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(24px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0)     scale(1);    }
+        }
+      `}</style>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Categories
-          </p>
-          <p className="mt-2 text-3xl font-black text-slate-900">
-            {stats.categories}
-          </p>
-        </div>
-        <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Selected subcategories
-          </p>
-          <p className="mt-2 text-3xl font-black text-slate-900">
-            {stats.subcategories}
-          </p>
-        </div>
-      </div>
-
-      {error && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm font-bold text-red-600">
-          {error}
-        </div>
-      )}
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
-        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white">
-          <div className="border-b border-slate-100 p-5">
+      <div className="space-y-8 pb-24" style={{ animation: "fadeSlideUp 0.35s ease both" }}>
+        
+        {/* ── Page Header ── */}
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--color-primary)]">
+              Admin Module
+            </p>
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
+              Categories
+            </h1>
+            <p className="mt-2 max-w-xl text-sm font-medium text-slate-500">
+              Manage course categories, subcategories, and JSON taxonomy imports.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
             <input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Filter loaded categories..."
-              className={`${inputClass} max-w-md`}
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={handleImport}
+              className="hidden"
             />
+            <GhostBtn onClick={() => fileInputRef.current?.click()} disabled={isSaving}>
+              📥 Import JSON
+            </GhostBtn>
+            <PrimaryBtn onClick={openCreateCategory} disabled={isSaving}>
+              + New Category
+            </PrimaryBtn>
           </div>
+        </div>
 
-          {isLoading ? (
-            <Spinner />
-          ) : visibleCategories.length === 0 ? (
-            <div className="p-6">
-              <EmptyState
-                title="No categories found"
-                message="Create a category or import a JSON taxonomy from the API."
-              />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[680px] text-left text-sm">
-                <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <tr>
-                    <th className="px-5 py-4">Category</th>
-                    <th className="px-5 py-4">ID</th>
-                    <th className="px-5 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {visibleCategories.map((category) => {
-                    const isSelected = selectedCategory?.id === category.id;
+        {/* ── Stats Grid ── */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <StatCard label="Total Categories" value={stats.categories} icon="📂" delay={0} />
+          <StatCard label="Active Subcategories" value={stats.subcategories} icon="📑" color="bg-indigo-50 text-indigo-600" delay={60} />
+        </div>
 
-                    return (
-                      <tr
-                        key={category.id}
-                        className={
-                          isSelected ? "bg-blue-50/60" : "hover:bg-slate-50/80"
-                        }
-                      >
-                        <td className="px-5 py-4">
-                          <button
-                            type="button"
-                            onClick={() => fetchSubcategories(category)}
-                            className="text-left"
-                          >
-                            <p className="font-black text-slate-900">
-                              {category.name ||
-                                category.categoryName ||
-                                "Untitled"}
-                            </p>
-                            <p className="mt-1 text-xs font-medium text-slate-400">
-                              Select to manage subcategories
-                            </p>
-                          </button>
-                        </td>
-                        <td className="px-5 py-4 font-bold text-slate-500">
-                          {category.id}
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => openEditCategory(category)}
-                              className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteCategory(category)}
-                              className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50"
-                              disabled={isSaving}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-[2rem] border border-slate-200 bg-white">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                Subcategories
-              </p>
-              <h2 className="mt-1 text-lg font-black text-slate-900">
-                {selectedCategory
-                  ? selectedCategory.name || selectedCategory.categoryName
-                  : "No category selected"}
-              </h2>
-            </div>
-            <PrimaryButton
-              onClick={openCreateSubcategory}
-              disabled={!selectedCategory || isSaving}
-            >
-              Add
-            </PrimaryButton>
+        {/* ── Error Banner ── */}
+        {error && (
+          <div className="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm font-bold text-red-600" style={{ animation: "fadeSlideUp 0.3s ease both" }}>
+            <span className="text-lg">⚠️</span> {error}
           </div>
+        )}
 
-          <div className="p-5">
-            {!selectedCategory ? (
-              <EmptyState
-                title="Select a category"
-                message="Choose a category from the table to load its subcategories."
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
+          
+          {/* ── Left Column: Categories List ── */}
+          <section className="flex flex-col gap-5">
+            <div className="flex items-center gap-3 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search categories..."
+                className="w-full flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-700 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
               />
-            ) : isSubcategoriesLoading ? (
-              <Spinner />
-            ) : subcategories.length === 0 ? (
-              <EmptyState
-                title="No subcategories"
-                message="Create the first subcategory for the selected category."
-              />
+              {searchTerm && <GhostBtn onClick={() => setSearchTerm("")} small>Clear</GhostBtn>}
+            </div>
+
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[...Array(6)].map((_, i) => <SkeletonCategoryCard key={i} delay={i * 40} />)}
+              </div>
+            ) : visibleCategories.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-dashed border-slate-200 bg-white px-6 py-24 text-center">
+                <span className="mb-4 text-4xl text-slate-300">📂</span>
+                <h3 className="text-lg font-black text-slate-700">No categories found</h3>
+                <p className="mt-2 text-sm font-medium text-slate-400">Create a category or import a JSON taxonomy.</p>
+              </div>
             ) : (
-              <div className="space-y-3">
-                {subcategories.map((subcategory) => (
-                  <div
-                    key={subcategory.id}
-                    className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-black text-slate-800">
-                        {subcategory.name ||
-                          subcategory.subcategoryName ||
-                          "Untitled"}
-                      </p>
-                      <p className="mt-1 text-xs font-bold text-slate-400">
-                        ID: {subcategory.id}
-                      </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {visibleCategories.map((category, i) => {
+                  const isSelected = selectedCategory?.id === category.id;
+                  return (
+                    <div
+                      key={category.id}
+                      onClick={() => fetchSubcategories(category)}
+                      className={`group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-[2rem] border p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 ${isSelected ? "border-[var(--color-primary)] bg-blue-50/30 shadow-blue-100" : "border-slate-100 bg-white hover:border-[var(--color-primary)]/30 hover:shadow-lg"}`}
+                      style={{ animation: `fadeSlideUp 0.3s ease both ${Math.min(i * 30, 400)}ms` }}
+                    >
+                      {isSelected && <div className="absolute inset-x-0 top-0 h-1 rounded-t-[2rem] bg-[var(--color-primary)]" />}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl text-lg transition-transform duration-300 group-hover:scale-110 ${isSelected ? "bg-[var(--color-primary)] text-white" : "bg-slate-50 text-slate-400"}`}>
+                          📁
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                           <button
+                             type="button"
+                             onClick={(e) => { e.stopPropagation(); openEditCategory(category); }}
+                             className="text-[10px] font-black uppercase tracking-widest text-slate-400 transition hover:text-[var(--color-primary)]"
+                           >
+                             Edit
+                           </button>
+                           <button
+                             type="button"
+                             onClick={(e) => handleDeleteCategory(category, e)}
+                             disabled={isSaving}
+                             className="text-[10px] font-black uppercase tracking-widest text-red-400 transition hover:text-red-500"
+                           >
+                             Del
+                           </button>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <h3 className={`text-base font-black leading-snug line-clamp-1 ${isSelected ? "text-[var(--color-primary)]" : "text-slate-900"}`}>
+                          {category.name || category.categoryName || "Untitled"}
+                        </h3>
+                        <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">ID: {category.id}</p>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openEditSubcategory(subcategory)}
-                        className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-white"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteSubcategory(subcategory)}
-                        className="rounded-xl px-3 py-2 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50"
-                        disabled={isSaving}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
-          </div>
-        </section>
+          </section>
+
+          {/* ── Right Column: Subcategories Panel ── */}
+          <section className="sticky top-24 flex max-h-[85vh] flex-col overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white shadow-sm">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-50 bg-slate-50/30 p-6">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)]">
+                  Subcategories
+                </p>
+                <h2 className="mt-1 text-lg font-black text-slate-900 line-clamp-1">
+                  {selectedCategory ? selectedCategory.name || selectedCategory.categoryName : "Select a category"}
+                </h2>
+              </div>
+              <PrimaryBtn
+                onClick={openCreateSubcategory}
+                disabled={!selectedCategory || isSaving}
+                small
+              >
+                + Add
+              </PrimaryBtn>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {!selectedCategory ? (
+                <div className="flex h-full flex-col items-center justify-center text-center">
+                  <span className="mb-3 text-4xl text-slate-200">👈</span>
+                  <p className="text-sm font-bold text-slate-400">Choose a category to load its subcategories.</p>
+                </div>
+              ) : isSubcategoriesLoading ? (
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => <SkeletonSubcategoryRow key={i} delay={i * 30} />)}
+                </div>
+              ) : subcategories.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center text-center">
+                  <span className="mb-3 text-3xl text-slate-200">📑</span>
+                  <p className="text-sm font-bold text-slate-400">No subcategories yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {subcategories.map((subcategory, i) => (
+                    <div
+                      key={subcategory.id}
+                      className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:border-[var(--color-primary)]/20 hover:shadow-md"
+                      style={{ animation: `fadeSlideUp 0.3s ease both ${i * 20}ms` }}
+                    >
+                      <div className="flex-1 overflow-hidden">
+                        <p className="truncate font-black text-slate-800">
+                          {subcategory.name || subcategory.subcategoryName || "Untitled"}
+                        </p>
+                        <p className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                          ID: {subcategory.id}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <button
+                          type="button"
+                          onClick={() => openEditSubcategory(subcategory)}
+                          className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:bg-[var(--color-primary)] hover:text-white"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSubcategory(subcategory)}
+                          disabled={isSaving}
+                          className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
       </div>
 
       <EntityModal
         isOpen={categoryModal.isOpen}
-        title={categoryModal.item?.id ? "Edit category" : "Create category"}
+        title={categoryModal.item?.id ? "Edit Category" : "Create Category"}
         initialValue={categoryModal.item}
         isSaving={isSaving}
         onClose={() => setCategoryModal({ isOpen: false, item: null })}
         onSubmit={handleSaveCategory}
       />
+      
       <EntityModal
         isOpen={subcategoryModal.isOpen}
-        title={
-          subcategoryModal.item?.id ? "Edit subcategory" : "Create subcategory"
-        }
+        title={subcategoryModal.item?.id ? "Edit Subcategory" : "Create Subcategory"}
         initialValue={subcategoryModal.item}
         isSaving={isSaving}
         onClose={() => setSubcategoryModal({ isOpen: false, item: null })}
         onSubmit={handleSaveSubcategory}
         includeCategoryId
+        categories={categories}
       />
-    </div>
+    </>
   );
 };
 

@@ -1,55 +1,48 @@
 // src/core/ui_components/Input.jsx
-import React, { useState } from "react";
+import React from "react";
 
 const Input = ({
   label,
-  name,
   type = "text",
   placeholder,
   value,
   onChange,
   error,
-  leftIcon,
+  icon,
+  className = "",
+  ...props
 }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === "password";
-  const inputType = isPassword && showPassword ? "text" : type;
-
   return (
-    <div className="flex flex-col mb-4 w-full group">
+    <div className={`flex flex-col gap-2 ${className}`}>
       {label && (
-        <label className="mb-2 text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+        <label className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
           {label}
         </label>
       )}
-      <div
-        className={`relative flex items-center bg-slate-50 border-2 rounded-2xl overflow-hidden transition-all duration-300 ${error ? "border-red-100 ring-1 ring-red-100" : "border-transparent focus-within:border-[#5b7cfa]/20 focus-within:bg-white focus-within:shadow-inner"}`}
-      >
-        {leftIcon && <span className="pl-4 text-gray-400">{leftIcon}</span>}
+      <div className="relative group">
+        {icon && (
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-primary transition-colors">
+            {icon}
+          </div>
+        )}
         <input
-          name={name}
-          type={inputType}
+          type={type}
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          className="w-full py-4 px-5 text-sm font-bold text-gray-700 bg-transparent outline-none placeholder:text-gray-300"
+          className={`w-full ${icon ? "pl-14" : "px-6"} py-4 bg-neutral-50 rounded-2xl border-2 border-transparent outline-none focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary-lightest transition-all font-bold text-sm shadow-inner ${
+            error ? "border-error-light bg-error/5 focus:border-error focus:ring-error-light" : ""
+          }`}
+          {...props}
         />
-        {isPassword && (
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="pr-5 text-[#5b7cfa] text-[10px] font-black uppercase tracking-widest"
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
-        )}
       </div>
       {error && (
-        <span className="mt-2 text-[10px] text-red-500 font-bold pl-1 animate-fade-in">
+        <span className="ml-2 text-[9px] font-black uppercase tracking-widest text-red-500 animate-fade-in">
           {error}
         </span>
       )}
     </div>
   );
 };
+
 export default Input;

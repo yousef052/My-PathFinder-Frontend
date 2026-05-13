@@ -5,12 +5,7 @@ import { apiClient } from "../../../core/network/apiClient";
 export const jobService = {
   // جلب الوظائف مع الفلاتر (SearchTerm, Location, JobType, ...)
   getAll: async (filters = {}) => {
-    const searchTerm = filters.SearchTerm || filters.name;
-    if (searchTerm) {
-      // Endpoint /jobs/search currently only supports ?name= query
-      const response = await apiClient.get("/jobs/search", { params: { name: searchTerm } });
-      return response.data;
-    }
+    // Swagger provides /api/jobs which supports various query parameters
     const response = await apiClient.get("/jobs", { params: filters });
     return response.data;
   },
@@ -49,4 +44,10 @@ export const jobService = {
       return [];
     }
   },
+
+  // البحث السريع بالاسم (إن وجد اختلاف عن التصفية العامة)
+  searchByName: async (name) => {
+    const response = await apiClient.get("/jobs/search", { params: { name } });
+    return response.data;
+  }
 };

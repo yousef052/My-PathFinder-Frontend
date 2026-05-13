@@ -1,7 +1,8 @@
-// src/features/profile/presentation/components/EditProfileModal.jsx
 import React, { useState, useEffect } from "react";
 import { useProfile } from "../../hooks/useProfile";
-import Button from "../../../../core/ui_components/Button";
+
+const inputCls =
+  "w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:bg-white focus:border-[var(--color-primary)] focus:ring-4 focus:ring-blue-50/50 transition-all font-bold text-sm shadow-inner";
 
 const EditProfileModal = ({
   isOpen,
@@ -23,10 +24,13 @@ const EditProfileModal = ({
 
   useEffect(() => {
     if (currentUser) {
-      // تحويل التاريخ لصيغة YYYY-MM-DD ليتناسب مع input type="date"
       let formattedDate = "";
       if (currentUser.dateOfBirth) {
-        formattedDate = new Date(currentUser.dateOfBirth).toISOString().split('T')[0];
+        try {
+          formattedDate = new Date(currentUser.dateOfBirth).toISOString().split('T')[0];
+        } catch (e) {
+          console.error("Invalid date", currentUser.dateOfBirth);
+        }
       }
 
       setFormData({
@@ -53,96 +57,142 @@ const EditProfileModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl overflow-hidden border border-white flex flex-col max-h-[90vh]">
-        <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight">
-            Edit Identity Profile
-          </h2>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-all"
-          >
-            ✕
-          </button>
-        </div>
+    <>
+      <style>{`
+        @keyframes modalPop {
+          from { opacity: 0; transform: scale(0.95) translateY(20px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes overlayFade {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+      `}</style>
 
-        <div className="p-10 overflow-y-auto custom-scrollbar flex-1 bg-white">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* قسم الصورة الشخصية */}
-            <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-              <div className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center text-3xl shadow-xl overflow-hidden border-2 border-white">
-                {selectedImage ? (
-                  <img
-                    src={URL.createObjectURL(selectedImage)}
-                    className="w-full h-full object-cover"
-                    alt="Preview"
-                  />
-                ) : (
-                  <>{formData.firstName?.[0] || "👤"}</>
-                )}
-              </div>
-              <label className="bg-[#5b7cfa] text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest cursor-pointer hover:shadow-lg transition-all shadow-blue-100 active:scale-95">
-                Change Photo
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => setSelectedImage(e.target.files[0])}
-                />
-              </label>
+      <div 
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+      >
+        {/* Overlay */}
+        <div 
+          className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+          onClick={onClose}
+          style={{ animation: "overlayFade 0.3s ease both" }}
+        />
+
+        {/* Modal Content */}
+        <div 
+          className="relative w-full max-w-3xl overflow-hidden rounded-[3.5rem] border border-white bg-white shadow-2xl flex flex-col max-h-[92vh]"
+          style={{ animation: "modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both" }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-slate-50 bg-slate-50/50 px-10 py-8">
+            <div>
+              <h2 className="text-3xl font-black italic tracking-tight text-slate-900">
+                Edit Profile
+              </h2>
+              <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Personal Identity & Details
+              </p>
             </div>
+            <button
+              onClick={onClose}
+              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm transition-all hover:bg-red-50 hover:text-red-500 active:scale-90"
+            >
+              <span className="text-2xl font-light">✕</span>
+            </button>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { name: "firstName", label: "First Name", type: "text" },
-                { name: "lastName", label: "Last Name", type: "text" },
-                { name: "userName", label: "User Name", type: "text" },
-                { name: "phoneNumber", label: "Phone Number", type: "tel" },
-                { name: "location", label: "Location", type: "text" },
-                { name: "dateOfBirth", label: "Date of Birth", type: "date" },
-              ].map((field) => (
-                <div key={field.name} className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">
-                    {field.label}
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto px-10 py-10 scrollbar-hide">
+            <form onSubmit={handleSubmit} className="space-y-10">
+              
+              {/* Avatar Upload */}
+              <div className="group relative flex items-center gap-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 transition-colors hover:border-[var(--color-primary)]/30 hover:bg-blue-50/10">
+                <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[2rem] border-4 border-white bg-white shadow-xl">
+                  {selectedImage ? (
+                    <img
+                      src={URL.createObjectURL(selectedImage)}
+                      className="h-full w-full object-cover"
+                      alt="Preview"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-[var(--color-primary)] text-4xl font-black text-white uppercase">
+                      {formData.firstName?.[0] || "👤"}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Profile Photo</h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase leading-relaxed">
+                    JPG or PNG. Recommended size: 400x400px.
+                  </p>
+                  <label className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-xl bg-white border border-slate-100 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)] shadow-sm transition-all hover:bg-[var(--color-primary)] hover:text-white active:scale-95">
+                    Choose New Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => setSelectedImage(e.target.files[0])}
+                    />
                   </label>
-                  <input
-                    type={field.type}
-                    value={formData[field.name] || ""}
+                </div>
+              </div>
+
+              {/* Grid Form Fields */}
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                {[
+                  { name: "firstName", label: "First Name", type: "text", placeholder: "John" },
+                  { name: "lastName", label: "Last Name", type: "text", placeholder: "Doe" },
+                  { name: "userName", label: "Username", type: "text", placeholder: "johndoe" },
+                  { name: "phoneNumber", label: "Phone Number", type: "tel", placeholder: "+1 (000) 000-0000" },
+                  { name: "location", label: "Current Location", type: "text", placeholder: "e.g. Cairo, Egypt" },
+                  { name: "dateOfBirth", label: "Date of Birth", type: "date" },
+                ].map((field) => (
+                  <div key={field.name} className="space-y-2">
+                    <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      {field.label}
+                    </label>
+                    <input
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={formData[field.name] || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [field.name]: e.target.value })
+                      }
+                      className={inputCls}
+                    />
+                  </div>
+                ))}
+                
+                <div className="space-y-2 md:col-span-2">
+                  <label className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Short Bio
+                  </label>
+                  <textarea
+                    value={formData.bio}
                     onChange={(e) =>
-                      setFormData({ ...formData, [field.name]: e.target.value })
+                      setFormData({ ...formData, bio: e.target.value })
                     }
-                    className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-50 transition-all font-bold text-sm shadow-sm"
+                    rows={4}
+                    className={`${inputCls} resize-none leading-relaxed`}
+                    placeholder="Write a short summary about your professional background..."
                   />
                 </div>
-              ))}
-              
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">
-                  Bio Description
-                </label>
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
-                  className="w-full p-6 bg-slate-50 rounded-[2rem] h-32 resize-none outline-none text-sm font-medium shadow-sm"
-                  placeholder="Tell us about yourself..."
-                />
               </div>
-            </div>
 
-            <Button
-              type="submit"
-              isLoading={isUpdating}
-              fullWidth
-              className="py-5 shadow-blue-200"
-            >
-              Sync & Save Changes
-            </Button>
-          </form>
+              {/* Submit CTA */}
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="w-full py-5 bg-[var(--color-primary)] text-white rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-[var(--color-primary-hover)] transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+              >
+                {isUpdating ? "Syncing Profile..." : "Save Changes"}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

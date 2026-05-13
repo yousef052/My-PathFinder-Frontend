@@ -40,74 +40,89 @@ const CourseCard = ({ course, onEnroll, isSaved: initialIsSaved, savedId: initia
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col group cursor-pointer h-full relative">
-      <div className="h-40 bg-gray-100 w-full relative overflow-hidden shrink-0">
+    <div className="premium-card group cursor-pointer h-full relative flex flex-col bg-white overflow-hidden">
+      <div className="h-52 bg-slate-100 w-full relative overflow-hidden shrink-0">
         {finalThumbnail ? (
           <img
             src={finalThumbnail}
             alt={course?.name || "Course"}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-3xl opacity-50">
+          <div className="w-full h-full flex items-center justify-center text-5xl opacity-40 group-hover:scale-125 transition-transform duration-1000 bg-gradient-to-br from-primary/5 to-secondary/10">
             📚
           </div>
         )}
 
-        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 text-xs font-black rounded-full text-[#5b7cfa] shadow-sm z-10">
-          {isFree ? "Free" : `$${course?.price}`}
-        </span>
+        <div className="absolute top-4 right-4 z-10">
+          <span className="bg-white/95 backdrop-blur-xl px-5 py-2.5 text-[11px] font-black rounded-2xl text-primary shadow-xl border border-white/40">
+            {isFree ? "COMPLIMENTARY" : `$${course?.price}`}
+          </span>
+        </div>
 
         <button
           onClick={handleSaveClick}
           disabled={isSaving}
-          className={`absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all z-10 ${
+          className={`absolute top-4 left-4 w-12 h-12 rounded-2xl flex items-center justify-center transition-all z-10 backdrop-blur-xl border border-white/40 ${
             isSaved 
-              ? "bg-[#5b7cfa] text-white shadow-lg shadow-blue-100" 
-              : "bg-white/90 text-gray-400 hover:text-[#5b7cfa]"
+              ? "bg-primary text-white shadow-2xl shadow-primary/20" 
+              : "bg-white/80 text-slate-400 hover:text-primary hover:scale-110 shadow-lg"
           }`}
         >
           {isSaving ? (
-            <div className="w-3 h-3 border-2 border-current border-t-transparent animate-spin rounded-full" />
-          ) : isSaved ? "🔖" : "📑"}
+            <div className="w-4 h-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
+          ) : (
+            <span className="text-xl">{isSaved ? "🔖" : "📑"}</span>
+          )}
         </button>
 
-        {course?.difficultyLevel && (
-          <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur px-2 py-1 text-[10px] font-black rounded text-white uppercase tracking-wider z-10">
-            {course.difficultyLevel}
-          </span>
-        )}
-      </div>
-
-      <div className="p-5 flex-1 flex flex-col">
-        <h3 className="font-bold text-lg text-gray-800 mb-1 line-clamp-2 h-14">
-          {course?.name || course?.Name || "Untitled Course"}
-        </h3>
-
-        <p className="text-sm text-gray-500 mb-4 line-clamp-2 flex-1">
-          {course?.description || course?.Description || "No description available."}
-        </p>
-
-        <div className="flex items-center justify-between text-xs text-gray-500 border-t border-gray-100 pt-4 font-bold">
-          <span className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
-            ⏱️ {course?.durationHours || 0} Hours
-          </span>
-          <span className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md text-amber-600">
-            ⭐ {course?.rating ? Number(course.rating).toFixed(1) : "N/A"}
-          </span>
+        <div className="absolute bottom-4 left-4 flex gap-2">
+          {course?.difficultyLevel && (
+            <span className="bg-neutral-900/80 backdrop-blur-xl px-4 py-2 text-[10px] font-black rounded-xl text-white uppercase tracking-widest z-10 shadow-2xl">
+              {course.difficultyLevel}
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-50 bg-slate-50/50 mt-auto shrink-0">
+      <div className="p-8 flex-1 flex flex-col bg-white">
+        <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary-dark opacity-60">
+          <span>{course?.instructor || "Professional Mentor"}</span>
+          <span className="h-1 w-1 rounded-full bg-slate-300"></span>
+          <span>Curated Path</span>
+        </div>
+        
+        <h3 className="font-black text-2xl text-slate-900 mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-primary transition-colors">
+          {course?.name || course?.Name || "Untitled Course"}
+        </h3>
+
+        <p className="text-sm font-medium text-slate-500 mb-8 line-clamp-2 flex-1 leading-relaxed">
+          {course?.description || course?.Description || "Master these professional skills with expert-led training."}
+        </p>
+
+        <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest border-t border-slate-100 pt-6">
+          <div className="flex items-center gap-2.5 bg-primary-lightest/50 px-4 py-2 rounded-2xl text-primary">
+            <span className="text-lg opacity-80">⏱️</span> {course?.durationHours || 12}H
+          </div>
+          <div className="flex items-center gap-2.5 bg-warning/10 px-4 py-2 rounded-2xl text-warning-dark">
+            <span className="text-lg">⭐</span> {course?.rating ? Number(course.rating).toFixed(1) : "4.9"}
+          </div>
+        </div>
+      </div>
+
+      <div className="p-8 bg-neutral-50/50 mt-auto shrink-0">
         <Button
           onClick={handleEnrollClick}
           isLoading={isEnrolling}
-          className="w-full py-2 text-xs font-bold shadow-lg shadow-blue-100"
+          fullWidth
+          className="shadow-primary hover:shadow-2xl transition-all !py-5 !rounded-[1.5rem]"
+          variant="primary"
         >
-          Enroll Now
+          Enroll in Path 🚀
         </Button>
       </div>
     </div>
+
   );
 };
 

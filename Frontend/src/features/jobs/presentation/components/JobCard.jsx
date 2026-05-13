@@ -50,26 +50,27 @@ const JobCard = ({ job, isAdmin, onDelete, onApply, isSaved: initialIsSaved, sav
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-200 hover:shadow-lg transition-all flex flex-col h-full group relative">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1 pr-8">
-          <h3 className="font-bold text-lg text-gray-800 line-clamp-1" title={job?.jobTitle || job?.title}>
+    <div className="bg-white/80 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white shadow-glass hover:shadow-2xl hover:bg-white transition-all duration-700 flex flex-col h-full group relative hover:-translate-y-2">
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex-1 pr-10">
+          <div className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-primary mb-3">Active Signal</div>
+          <h3 className="font-black text-xl text-slate-900 italic tracking-tight line-clamp-2 leading-tight" title={job?.jobTitle || job?.title}>
             {job?.jobTitle || job?.title || "Untitled Position"}
           </h3>
-          <p className="text-sm text-[#5b7cfa] font-medium mt-1">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mt-2">
             {job?.companyName || "External Provider"}
           </p>
         </div>
 
-        <div className="flex items-start gap-2 absolute top-6 right-6">
+        <div className="flex items-start gap-2 absolute top-8 right-8">
           {!isAdmin && (
             <button
               onClick={handleSaveClick}
               disabled={isSaving}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+              className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all shadow-sm ${
                 isSaved 
-                  ? "bg-blue-50 text-[#5b7cfa] shadow-sm" 
-                  : "bg-gray-50 text-gray-300 hover:text-[#5b7cfa]"
+                  ? "bg-primary text-white shadow-primary/20 scale-110" 
+                  : "bg-slate-50 text-slate-300 hover:text-primary hover:bg-white"
               }`}
             >
               {isSaving ? (
@@ -81,47 +82,49 @@ const JobCard = ({ job, isAdmin, onDelete, onApply, isSaved: initialIsSaved, sav
           {isAdmin && (
             <button
               onClick={() => onDelete?.(job?.id)}
-              className="text-gray-300 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-lg transition-colors"
+              className="text-slate-300 hover:text-red-500 bg-slate-50 hover:bg-red-50 w-10 h-10 flex items-center justify-center rounded-2xl transition-all shadow-sm"
             >
-              🗑️
+              ✕
             </button>
           )}
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        <span className="bg-gray-50 text-gray-600 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-slate-100">
-          📍 {job?.location || "Remote"}
-        </span>
-        <span className="bg-gray-50 text-gray-600 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-slate-100">
-          💼 {job?.jobType || "Full-time"}
-        </span>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <div className="bg-slate-50 text-slate-500 text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl border border-slate-100 flex items-center gap-2">
+          <span className="opacity-50">📍</span> {job?.location || "Global"}
+        </div>
+        <div className="bg-slate-50 text-slate-500 text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl border border-slate-100 flex items-center gap-2">
+          <span className="opacity-50">💼</span> {job?.jobType || "Full-time"}
+        </div>
         {job?.experienceLevel && (
-          <span className="bg-gray-50 text-gray-600 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-slate-100">
-            📈 {job?.experienceLevel}
-          </span>
+          <div className="bg-slate-50 text-slate-500 text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl border border-slate-100 flex items-center gap-2">
+            <span className="opacity-50">📈</span> {job?.experienceLevel}
+          </div>
         )}
       </div>
 
-      <p className="text-sm text-gray-500 line-clamp-3 mb-6 flex-1">
-        {job?.description || "No description available."}
+      <p className="text-sm font-medium text-slate-500 leading-relaxed line-clamp-3 mb-8 flex-1">
+        {job?.description || "Curated professional opportunity synthesized for your specific trajectory node."}
       </p>
 
-      <div className="mt-auto flex justify-between items-center border-t border-gray-100 pt-4">
-        <div className="text-[10px] font-black text-gray-700 bg-slate-50 px-3 py-2 rounded-xl">
-          {job?.salaryMin && job?.salaryMax
-            ? `$${job.salaryMin} - $${job.salaryMax}`
-            : "Salary Undisclosed"}
+      <div className="mt-auto flex justify-between items-center border-t border-slate-100 pt-6">
+        <div className="flex flex-col">
+          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1">Stipend / Value</p>
+          <div className="text-xs font-black text-slate-900">
+            {job?.salaryMin && job?.salaryMax
+              ? `$${job.salaryMin.toLocaleString()} — $${job.salaryMax.toLocaleString()}`
+              : "Competitive Yield"}
+          </div>
         </div>
 
-        <Button
-          variant="primary"
-          className="shadow-lg shadow-blue-100 text-[10px] py-2 px-6 uppercase tracking-widest font-black"
+        <button
+          className="bg-primary text-white text-[9px] py-3 px-8 uppercase tracking-[0.2em] font-black rounded-2xl shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50"
           onClick={handleApplyClick}
-          isLoading={isApplying}
+          disabled={isApplying}
         >
-          {job.externalUrl ? "External ↗" : "Apply"}
-        </Button>
+          {isApplying ? "Engaging..." : job.externalUrl ? "External ↗" : "Integrate"}
+        </button>
       </div>
     </div>
   );

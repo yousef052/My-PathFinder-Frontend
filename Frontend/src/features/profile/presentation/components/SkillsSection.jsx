@@ -1,7 +1,5 @@
-// src/features/profile/presentation/components/SkillsSection.jsx
 import React, { useState } from "react";
 import { useSkills } from "../../hooks/useSkills";
-import Button from "../../../../core/ui_components/Button";
 
 const SkillsSection = () => {
   const { mySkills, globalSkills, isLoading, handleAddMySkill, handleRemoveMySkill, isSubmitting } =
@@ -41,46 +39,54 @@ const SkillsSection = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-white shadow-xl shadow-blue-50/30">
-      <div className="flex justify-between items-center mb-8 px-2">
-        <h3 className="font-black text-gray-900 text-xl italic tracking-tight">
-          🎯 Skills
+    <div className="glass-card p-10 rounded-[3rem] border border-white/50 shadow-glass">
+      <div className="flex justify-between items-center mb-10 px-2">
+        <h3 className="font-black text-slate-900 text-2xl italic tracking-tight flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl shadow-inner">🎯</div>
+          Skills Matrix
         </h3>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className={`w-10 h-10 rounded-full font-black text-xl transition-all shadow-sm z-10 ${showAddForm ? "bg-red-50 text-red-400 rotate-45" : "bg-blue-50 text-[#5b7cfa]"}`}
+          className={`w-12 h-12 rounded-2xl font-black text-2xl transition-all shadow-sm flex items-center justify-center ${
+            showAddForm 
+              ? "bg-red-50 text-red-500 hover:bg-red-100 rotate-45" 
+              : "bg-primary/5 text-primary hover:bg-primary hover:text-white"
+          }`}
         >
-          {showAddForm ? "✕" : "+"}
+          +
         </button>
       </div>
 
       {showAddForm && (
         <form
           onSubmit={handleManualAdd}
-          className="mb-8 space-y-3 animate-fade-in relative z-20"
+          className="mb-10 space-y-4 animate-fade-in"
         >
-          <input
-            type="text"
-            placeholder="Type skill name (e.g. JavaScript)..."
-            value={newSkillName}
-            onChange={(e) => setNewSkillName(e.target.value)}
-            className="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm shadow-inner focus:bg-white transition-all"
-            autoFocus
-          />
-          <Button
-            isLoading={isSubmitting}
-            fullWidth
-            className="py-3 text-[10px] rounded-2xl shadow-blue-100"
+          <div className="relative group">
+            <input
+              type="text"
+              placeholder="Search skill (e.g. React)..."
+              value={newSkillName}
+              onChange={(e) => setNewSkillName(e.target.value)}
+              className="w-full p-6 bg-slate-50/50 backdrop-blur-sm rounded-2xl border border-slate-100 outline-none font-bold text-sm shadow-inner focus:bg-white focus:border-primary transition-all"
+              autoFocus
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-5 bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50"
           >
-            Confirm & Save
-          </Button>
+            {isSubmitting ? "Sychronizing..." : "Identify & Add Skill"}
+          </button>
         </form>
       )}
 
       {isLoading ? (
-        <div className="flex gap-2 animate-pulse flex-wrap">
-          <div className="h-10 bg-slate-100 rounded-xl w-24"></div>
-          <div className="h-10 bg-slate-100 rounded-xl w-32"></div>
+        <div className="flex flex-wrap gap-4 animate-pulse">
+          <div className="h-12 bg-slate-100 rounded-2xl w-24"></div>
+          <div className="h-12 bg-slate-100 rounded-2xl w-32"></div>
+          <div className="h-12 bg-slate-100 rounded-2xl w-20"></div>
         </div>
       ) : (
         <div className="flex flex-wrap gap-3">
@@ -88,22 +94,25 @@ const SkillsSection = () => {
             mySkills.map((skill, idx) => (
               <div
                 key={skill.userSkillId || skill.id || idx}
-                className="group/tag relative bg-slate-50 hover:bg-[#5b7cfa]/5 text-gray-700 px-5 py-2.5 rounded-2xl text-xs font-black border border-gray-100 transition-all uppercase tracking-widest flex items-center gap-2"
+                className="group relative bg-white/40 backdrop-blur-md hover:bg-white text-slate-700 px-6 py-4 rounded-2xl text-[10px] font-black border border-slate-100 transition-all uppercase tracking-[0.15em] flex items-center gap-3 shadow-sm hover:shadow-xl hover:-translate-y-1"
               >
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 {skill.skillName || skill.name}
                 <button
                   type="button"
                   onClick={() => handleRemoveMySkill(skill.userSkillId || skill.id)}
-                  className="w-4 h-4 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-[8px] hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover/tag:opacity-100"
+                  className="w-6 h-6 rounded-lg bg-red-50 text-red-400 flex items-center justify-center text-[8px] hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
                 >
                   ✕
                 </button>
               </div>
             ))
           ) : (
-            <p className="text-gray-400 text-[10px] font-bold uppercase p-2">
-              No skills yet.
-            </p>
+            <div className="w-full py-16 text-center bg-slate-50/30 rounded-[3rem] border-2 border-dashed border-slate-100">
+              <p className="text-slate-300 text-[10px] font-black uppercase tracking-[0.4em]">
+                No verified skills in cluster
+              </p>
+            </div>
           )}
         </div>
       )}

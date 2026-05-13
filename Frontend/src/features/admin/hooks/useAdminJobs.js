@@ -17,55 +17,56 @@ const getErrorMessage = (error, fallback) => {
   return data?.message || data?.title || error?.message || fallback;
 };
 
-export const useAdminPlatforms = () => {
-  const [platforms, setPlatforms] = useState([]);
+export const useAdminJobs = () => {
+  const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchPlatforms = useCallback(async () => {
+  const fetchJobs = useCallback(async (searchTerm = "") => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await adminService.platforms.getAll({ onlyActive: false });
-      setPlatforms(toArray(data));
+      const params = searchTerm.trim() ? { SearchTerm: searchTerm } : {};
+      const data = await adminService.jobs.getAll(params);
+      setJobs(toArray(data));
       return true;
     } catch (err) {
-      setError(getErrorMessage(err, "Failed to load platforms."));
+      setError(getErrorMessage(err, "Failed to load jobs."));
       return false;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const savePlatform = useCallback(async (payload, id = null) => {
+  const saveJob = useCallback(async (formData, id = null) => {
     setIsSaving(true);
     setError(null);
     try {
       if (id) {
-        await adminService.platforms.update(id, payload);
+        await adminService.jobs.update(id, formData);
       } else {
-        await adminService.platforms.create(payload);
+        await adminService.jobs.create(formData);
       }
-      await fetchPlatforms();
+      await fetchJobs();
       return true;
     } catch (err) {
-      setError(getErrorMessage(err, "Failed to save platform."));
+      setError(getErrorMessage(err, "Failed to save job."));
       return false;
     } finally {
       setIsSaving(false);
     }
-  }, [fetchPlatforms]);
+  }, [fetchJobs]);
 
-  const deletePlatform = useCallback(async (id) => {
+  const deleteJob = useCallback(async (id) => {
     setIsSaving(true);
     setError(null);
     try {
-      await adminService.platforms.delete(id);
-      setPlatforms((prev) => prev.filter((platform) => platform.id !== id));
+      await adminService.jobs.delete(id);
+      setJobs((prev) => prev.filter((job) => job.id !== id));
       return true;
     } catch (err) {
-      setError(getErrorMessage(err, "Failed to delete platform."));
+      setError(getErrorMessage(err, "Failed to delete job."));
       return false;
     } finally {
       setIsSaving(false);
@@ -73,12 +74,12 @@ export const useAdminPlatforms = () => {
   }, []);
 
   return {
-    platforms,
+    jobs,
     isLoading,
     isSaving,
     error,
-    fetchPlatforms,
-    savePlatform,
-    deletePlatform,
+    fetchJobs,
+    saveJob,
+    deleteJob,
   };
 };

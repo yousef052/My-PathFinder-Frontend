@@ -1,6 +1,6 @@
-// src/features/chatbot/presentation/screens/ChatbotScreen.jsx
 import React, { useRef, useEffect } from "react";
 import { useChatbot } from "../../hooks/useChatbot";
+import Button from "../../../../core/ui_components/Button";
 
 const ChatbotScreen = () => {
   const {
@@ -18,102 +18,128 @@ const ChatbotScreen = () => {
     setSelectedFile,
   } = useChatbot();
 
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    document.documentElement.style.setProperty('--theme-color', '#6366f1');
+    document.documentElement.style.setProperty('--bg-orb-1', '#6366f1');
+    document.documentElement.style.setProperty('--bg-orb-2', '#818cf8');
+    document.documentElement.style.setProperty('--bg-orb-3', '#312e81');
+    document.documentElement.style.setProperty('--bg-gradient-start', '#312e81');
+    document.documentElement.style.setProperty('--bg-gradient-end', '#1e1b4b');
+  }, []);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-160px)] max-w-5xl mx-auto bg-white rounded-[3rem] shadow-2xl border border-white overflow-hidden animate-fade-in">
-      {/* Header[cite: 25] */}
-      <div className="bg-[#5b7cfa] p-8 text-white flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-5">
-          <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center text-3xl backdrop-blur-md">
+    <div className="mx-auto flex h-[calc(100vh-160px)] w-full flex-col overflow-hidden rounded-[2.5rem] border-4 border-white bg-white shadow-2xl animate-fade-slide">
+      
+      {/* ── Header ── */}
+      <div className="flex shrink-0 items-center justify-between bg-white/80 backdrop-blur-xl p-5 border-b border-slate-100 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-2xl shadow-inner">
             🤖
           </div>
           <div>
-            <h2 className="text-xl font-black italic tracking-tight">
-              Path Finder AI
-            </h2>
-            <p className="text-blue-100 text-[10px] font-black uppercase tracking-widest mt-1">
+            <h2 className="text-xl font-black italic tracking-tight text-slate-950">PathFinder AI</h2>
+            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-primary mt-0.5">
               Active Intelligence Engine
             </p>
           </div>
         </div>
 
-        {/* Difficulty Selector for Interview Mode[cite: 24, 25] */}
         {activeMode === MODES.INTERVIEW && (
-          <select
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none"
-          >
-            <option value="Beginner" className="text-gray-900">
-              Beginner
-            </option>
-            <option value="Intermediate" className="text-gray-900">
-              Intermediate
-            </option>
-            <option value="Expert" className="text-gray-900">
-              Expert
-            </option>
-          </select>
+          <div className="hidden sm:block">
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[9px] font-black uppercase outline-none focus:ring-4 focus:ring-primary/5 transition-all"
+            >
+              <option value="Beginner" className="text-slate-900">Beginner</option>
+              <option value="Intermediate" className="text-slate-900">Intermediate</option>
+              <option value="Expert" className="text-slate-900">Expert</option>
+            </select>
+          </div>
         )}
       </div>
 
-      {/* Mode Tabs[cite: 25] */}
-      <div className="flex bg-slate-50 border-b border-gray-100 p-3 gap-2 justify-center">
-        {[MODES.ASK, MODES.ROADMAP, MODES.INTERVIEW].map((mode) => (
+      {/* ── Mode Selection ── */}
+      <div className="flex gap-2 bg-slate-50/50 p-2 border-b border-slate-100">
+        {[
+          { id: MODES.ASK, label: "Chat", icon: "💬" },
+          { id: MODES.ROADMAP, label: "Roadmap", icon: "🗺️" },
+          { id: MODES.INTERVIEW, label: "Interview", icon: "🎯" }
+        ].map((mode) => (
           <button
-            key={mode}
-            onClick={() => setActiveMode(mode)}
-            className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeMode === mode ? "bg-white text-[#5b7cfa] shadow-md" : "text-gray-400 hover:text-[#5b7cfa]"}`}
+            key={mode.id}
+            onClick={() => setActiveMode(mode.id)}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+              activeMode === mode.id 
+                ? "bg-white text-primary shadow-sm scale-102" 
+                : "text-neutral-400 hover:text-neutral-600"
+            }`}
           >
-            {mode === MODES.ASK
-              ? "💬 General"
-              : mode === MODES.ROADMAP
-                ? "🗺️ Roadmap"
-                : "🎯 Interview"}
+            <span className="text-base">{mode.icon}</span>
+            <span className="hidden sm:inline">{mode.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Messages Area[cite: 25] */}
-      <div className="flex-1 overflow-y-auto p-10 space-y-8 bg-slate-50/20 custom-scrollbar">
+      <div 
+        ref={chatContainerRef}
+        className="custom-scrollbar flex-1 overflow-y-auto bg-slate-50/10 p-6 space-y-6"
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-pop`}
           >
             <div
-              className={`max-w-[80%] p-6 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm ${msg.sender === "user" ? "bg-[#5b7cfa] text-white rounded-tr-none" : "bg-white text-gray-800 border border-gray-50 rounded-tl-none"}`}
+              className={`relative max-w-[85%] p-5 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm ${
+                msg.sender === "user" 
+                  ? "bg-primary text-white rounded-tr-none shadow-primary-lightest" 
+                  : "bg-white text-neutral-800 border border-neutral-100 rounded-tl-none"
+              }`}
             >
               {msg.text}
+              <div className={`absolute bottom-[-18px] text-[7px] font-black uppercase tracking-widest text-slate-300 ${
+                msg.sender === "user" ? "right-2" : "left-2"
+              }`}>
+                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </div>
             </div>
           </div>
         ))}
         {isLoading && (
-          <div className="flex justify-start text-2xl animate-bounce ml-6">
-            ...
+          <div className="flex gap-1.5 p-4 bg-white rounded-2xl w-fit shadow-sm border border-neutral-50 animate-pulse ml-2">
+            <div className="w-1 h-1 bg-primary rounded-full animate-bounce" />
+            <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" />
+            <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+            <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Section[cite: 25] */}
-      <div className="p-8 bg-white border-t border-gray-100">
+      {/* ── Input Bar ── */}
+      <div className="p-6 bg-indigo-50/30 border-t border-indigo-100">
         {selectedFile && (
-          <div className="mb-4 p-3 bg-blue-50 text-[#5b7cfa] text-[10px] font-black rounded-xl flex justify-between items-center">
-            📄 {selectedFile.name}
-            <button onClick={() => setSelectedFile(null)}>✕</button>
+          <div className="mb-3 flex items-center justify-between bg-indigo-100 p-2 rounded-lg border border-indigo-200 animate-pop">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <span className="text-lg">📄</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-indigo-800 truncate">{selectedFile.name}</span>
+            </div>
+            <button onClick={() => setSelectedFile(null)} className="hover:text-error transition-colors">✕</button>
           </div>
         )}
 
         <form
           onSubmit={handleSendMessage}
-          className="flex gap-4 items-center bg-slate-50 p-2 pl-6 rounded-[2.5rem] shadow-inner border-2 border-transparent focus-within:border-blue-100 transition-all"
+          className="flex gap-3 items-center bg-white p-1.5 pl-6 rounded-full focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all shadow-inner border border-indigo-100"
         >
           <input
             type="text"
@@ -121,35 +147,36 @@ const ChatbotScreen = () => {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder={
               activeMode === MODES.ROADMAP
-                ? "Enter job title to generate roadmap..."
-                : "Type your message..."
+                ? "Enter target job title..."
+                : "Ask PathFinder anything..."
             }
-            className="flex-1 bg-transparent py-4 outline-none text-sm font-bold text-gray-700"
+            className="flex-1 bg-transparent py-3 outline-none text-sm font-bold text-slate-700"
             disabled={isLoading}
           />
 
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={(e) => setSelectedFile(e.target.files[0])}
-          />
-
-          <button
-            type="button"
-            onClick={() => fileInputRef.current.click()}
-            className="p-3 text-xl hover:rotate-12 transition-transform"
-          >
-            📎
-          </button>
-
-          <button
-            type="submit"
-            disabled={isLoading || (!inputMessage.trim() && !selectedFile)}
-            className="bg-[#5b7cfa] text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100 active:scale-90 disabled:opacity-30"
-          >
-            🚀
-          </button>
+          <div className="flex items-center gap-2 pr-1">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current.click()}
+              className="p-2 text-neutral-400 hover:text-primary transition-colors"
+              title="Attach File"
+            >
+              <span className="text-xl">📎</span>
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+            />
+            <Button
+              type="submit"
+              disabled={isLoading || (!inputMessage.trim() && !selectedFile)}
+              className="!px-5 !py-3 !rounded-full"
+              variant="primary"
+              icon="🚀"
+            />
+          </div>
         </form>
       </div>
     </div>

@@ -1,5 +1,5 @@
 // src/features/courses/presentation/screens/AddCourseModal.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "../../../../core/ui_components/Button";
 
 const AddCourseModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
@@ -17,6 +17,15 @@ const AddCourseModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
     PlatformId: 1,
   });
   const [thumbnailFile, setThumbnailFile] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => { document.body.style.overflow = "unset"; };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

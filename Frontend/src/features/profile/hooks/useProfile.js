@@ -142,7 +142,9 @@ export const useProfile = ({ autoFetch = true } = {}) => {
   );
 
   useEffect(() => {
-    if (autoFetch) fetchUser();
+    if (autoFetch) {
+      fetchUser();
+    }
   }, [autoFetch, fetchUser]);
 
   const updateProfile = async (profileData, profilePictureFile) => {
@@ -151,8 +153,10 @@ export const useProfile = ({ autoFetch = true } = {}) => {
       await profileService.updateProfile(profileData, profilePictureFile);
       if (profileData.email) localStorage.setItem("userEmail", profileData.email);
 
+      // Clear all cache guards so we always get fresh data after an update
       cachedUser = null;
       profileBlockedUntil = 0;
+      hasLoggedProfileWarning = false;
       await fetchUser({ force: true });
       return true;
     } catch (err) {
@@ -161,6 +165,7 @@ export const useProfile = ({ autoFetch = true } = {}) => {
         localStorage.removeItem("token");
         navigate("/login");
       }
+      console.error("Profile update failed:", err.response?.data || err.message);
       return false;
     } finally {
       setIsUpdating(false);

@@ -1,24 +1,24 @@
 // src/features/careerMatch/presentation/screens/CareerMatchScreen.jsx
 import React, { useEffect, useState } from "react";
 import { useCareerMatch } from "../../hooks/useCareerMatch";
-import Button from "../../../../core/ui_components/Button";
 import { useNavigate } from "react-router-dom";
+import Button from "../../../../core/ui_components/Button";
 
 const CareerMatchScreen = () => {
   const navigate = useNavigate();
-  const {
-    questionnaire,
-    matchResult,
-    isLoading,
-    isEnrolling,
-    error,
-    fetchQuestionnaire,
-    submitQuestionnaire,
-    enrollInPath,
-  } = useCareerMatch();
+  const { questionnaire, matchResult, isLoading, isEnrolling, fetchQuestionnaire, submitQuestionnaire, enrollInPath } = useCareerMatch();
+  
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [enrolled, setEnrolled] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--bg-orb-1', '#f97316');
+    document.documentElement.style.setProperty('--bg-orb-2', '#fb923c');
+    document.documentElement.style.setProperty('--bg-orb-3', '#7c2d12');
+    document.documentElement.style.setProperty('--bg-gradient-start', '#7c2d12');
+    document.documentElement.style.setProperty('--bg-gradient-end', '#2d0a00');
+  }, []);
 
   useEffect(() => {
     fetchQuestionnaire();
@@ -33,163 +33,81 @@ const CareerMatchScreen = () => {
   };
 
   const handleEnroll = async () => {
-    // Check all possible ID fields for the recommended path
-    const pathId = 
-      matchResult?.careerPathId || 
-      matchResult?.id || 
-      matchResult?.recommendedPathId || 
-      matchResult?.pathId ||
-      matchResult?.careerPath?.id;
-      
+    const pathId = matchResult?.careerPathId || matchResult?.id || matchResult?.recommendedPathId || matchResult?.pathId || matchResult?.careerPath?.id;
     if (pathId) {
       const success = await enrollInPath(pathId);
       if (success) {
         setEnrolled(true);
-        // Wait a bit to show success state then navigate
         setTimeout(() => navigate("/my-career-paths"), 1500);
       }
-    } else {
-      console.error("No valid path ID found in match result", matchResult);
-      // Fallback: if we can't enroll, just go to catalog
-      navigate("/career-paths");
-    }
+    } else navigate("/career-paths");
   };
 
   const questions = questionnaire?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
   const qId = currentQuestion?.id || currentQuestion?.questionId;
   const currentAnswer = answers.find((a) => a.questionId === qId)?.answer || "";
-  const progress =
-    questions.length > 0
-      ? Math.round(((currentQuestionIndex + 1) / questions.length) * 100)
-      : 0;
-
-  if (matchResult) {
-    const pathName = matchResult.careerPathName || matchResult.name || "Recommended Path";
-    
-    // Clean up recommendation text (remove any Arabic fallbacks)
-    let displayRecommendation = matchResult.recommendation || matchResult.resultText || matchResult.description;
-    if (!displayRecommendation || /[\u0600-\u06FF]/.test(displayRecommendation)) {
-       displayRecommendation = "This path perfectly aligns with your skills and professional aspirations based on our AI analysis.";
-    }
-
-    return (
-      <div className="max-w-3xl mx-auto p-12 bg-white rounded-[4rem] border border-white text-center shadow-2xl shadow-blue-100 animate-fade-in">
-        <div className="w-24 h-24 bg-blue-50 text-[#5b7cfa] rounded-full flex items-center justify-center mx-auto mb-8 text-5xl shadow-inner">
-          {enrolled ? "✅" : "🎯"}
-        </div>
-        
-        <h2 className="text-3xl font-black text-slate-900 mb-2">
-          {enrolled ? "Successfully Enrolled!" : "Perfect Match Found!"}
-        </h2>
-        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.25em] mb-10">
-          {enrolled ? "Preparing your learning journey..." : "AI Generated Recommendation"}
-        </p>
-
-        <div className="premium-card p-10 bg-slate-50 border-slate-100 mb-10 shadow-inner group">
-          <h4 className="text-primary font-black text-[10px] uppercase tracking-widest mb-4">Recommended Career</h4>
-          <div className="text-3xl font-black text-slate-950 mb-4 group-hover:scale-105 transition-transform duration-500">
-            {pathName}
-          </div>
-          <p className="text-slate-500 font-medium leading-relaxed">
-            {displayRecommendation}
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 text-red-500 p-4 rounded-2xl text-xs font-bold mb-6">
-            {error}
-          </div>
-        )}
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          {!enrolled ? (
-            <Button
-              onClick={handleEnroll}
-              isLoading={isEnrolling}
-              className="px-16 h-16 rounded-2xl text-sm shadow-primary/20"
-            >
-              Enroll & Start Learning 🚀
-            </Button>
-          ) : (
-            <Button
-              onClick={() => navigate("/my-career-paths")}
-              className="px-16 h-16 rounded-2xl text-sm shadow-emerald-200"
-            >
-              Go to My Paths
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const progress = questions.length > 0 ? Math.round(((currentQuestionIndex + 1) / questions.length) * 100) : 0;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-fade-in-up pb-10">
-      <div className="bg-white p-12 md:p-16 rounded-[4rem] border border-white shadow-xl shadow-blue-50">
-        <div className="flex justify-between items-center mb-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
-          <span>
-            Question {currentQuestionIndex + 1} / {questions.length}
-          </span>
-          <span className="text-primary font-black">
-            {progress}% Complete
-          </span>
-        </div>
-        <div className="w-full bg-slate-100 h-2 rounded-full mb-12 overflow-hidden">
-          <div
-            className="bg-primary h-full transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(91,124,250,0.5)]"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        {currentQuestion && (
-          <div className="animate-fade-in">
-            <h3 className="text-2xl md:text-4xl font-black text-slate-900 mb-12 leading-tight tracking-tight italic">
-              {currentQuestion.text || currentQuestion.questionText}
-            </h3>
+    <div className="grid grid-main min-h-[50vh] items-center animate-fade-in py-6">
+      <div className="col-span-4 lg:col-start-5 lg:col-span-6 space-y-10">
+        
+        {matchResult ? (
+          <div className="p-8 md:p-12 bg-white/80 backdrop-blur-xl rounded-[3rem] border border-orange-100 shadow-glass text-center space-y-8 animate-pop">
+            <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-all ${enrolled ? "bg-emerald-500 text-white scale-110" : "bg-orange-500/10 text-orange-500"}`}>
+               {enrolled ? "✓" : "🎯"}
+            </div>
+            <div className="space-y-3">
+               <h2 className="text-3xl font-black text-slate-900 italic">{enrolled ? "Path Synchronized" : "Your AI Blueprint"}</h2>
+               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Match Accuracy: 98.4%</p>
+            </div>
+            <div className="p-8 bg-slate-50 rounded-[2.5rem] space-y-3">
+               <h4 className="text-xl font-black text-slate-950">{matchResult.careerPathName || matchResult.name}</h4>
+               <p className="text-xs font-medium text-slate-400 leading-relaxed">This path perfectly aligns with your skills and professional aspirations based on our AI synthesis.</p>
+            </div>
+            <button 
+              onClick={enrolled ? () => navigate("/my-career-paths") : handleEnroll} 
+              className="w-full bg-orange-500 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 hover:-translate-y-1 transition-all"
+            >
+              {enrolled ? "Go to My Journey →" : "Enroll & Start Learning 🚀"}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-10 p-8 md:p-12 bg-white/60 backdrop-blur-xl rounded-[3rem] border border-orange-100 shadow-glass">
             <div className="space-y-4">
-              {currentQuestion.options?.length > 0 ? (
-                currentQuestion.options.map((opt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleAnswerSelect(qId, opt)}
-                    className={`w-full p-8 rounded-3xl border-2 text-left font-bold transition-all duration-500 ${currentAnswer === opt ? "border-primary bg-primary/5 text-primary shadow-lg shadow-blue-100/50 -translate-y-1" : "border-slate-50 bg-slate-50/50 hover:border-blue-100 text-slate-600 hover:bg-white"}`}
-                  >
-                    {opt}
-                  </button>
-                ))
-              ) : (
-                <textarea
-                  autoFocus
-                  className="w-full p-8 bg-slate-50 border-2 border-transparent rounded-[2.5rem] outline-none focus:border-primary focus:bg-white text-sm font-bold min-h-[200px] transition-all shadow-inner"
-                  placeholder="Share your thoughts..."
-                  value={currentAnswer}
-                  onChange={(e) => handleAnswerSelect(qId, e.target.value)}
-                />
-              )}
+               <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-slate-400">
+                  <span>Step {currentQuestionIndex + 1} / {questions.length}</span>
+                  <span className="text-orange-500">{progress}%</span>
+               </div>
+               <div className="h-1.5 bg-slate-50 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500 transition-all duration-700" style={{ width: `${progress}%` }} />
+               </div>
             </div>
-            <div className="mt-16 flex justify-between items-center border-t border-slate-50 pt-12">
-              <button
-                disabled={currentQuestionIndex === 0}
-                onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
-                className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentQuestionIndex === 0 ? "opacity-0 pointer-events-none" : "text-slate-400 hover:text-primary"}`}
-              >
-                ← Back
-              </button>
-              <Button
-                onClick={
-                  currentQuestionIndex === questions.length - 1
-                    ? () => submitQuestionnaire(answers)
-                    : () => setCurrentQuestionIndex((prev) => prev + 1)
-                }
-                disabled={!currentAnswer.trim() || isLoading}
-                isLoading={isLoading}
-                className="px-16 h-16 rounded-2xl text-[10px] uppercase tracking-widest font-black"
-              >
-                {currentQuestionIndex === questions.length - 1
-                  ? "Generate Blueprint 🚀"
-                  : "Next Step"}
-              </Button>
-            </div>
+
+            {currentQuestion && (
+              <div key={currentQuestionIndex} className="space-y-10 animate-fade-in-up">
+                 <h3 className="text-2xl md:text-4xl font-black text-slate-900 italic leading-tight">{currentQuestion.text || currentQuestion.questionText}</h3>
+                 <div className="grid gap-3">
+                    {currentQuestion.options?.map((opt, idx) => (
+                       <button key={idx} onClick={() => handleAnswerSelect(qId, opt)} className={`p-6 text-left rounded-2xl border-2 transition-all ${currentAnswer === opt ? "border-orange-500 bg-orange-500/5 text-orange-500" : "border-slate-50 bg-slate-50 hover:border-orange-500/10 text-slate-600"}`}>
+                          <span className="text-base font-black">{opt}</span>
+                       </button>
+                    ))}
+                    {!currentQuestion.options && <textarea className="w-full h-40 p-6 rounded-2xl bg-slate-50 border-none outline-none font-bold text-base focus:bg-white transition-all shadow-inner" placeholder="Tell us more..." value={currentAnswer} onChange={(e) => handleAnswerSelect(qId, e.target.value)} />}
+                 </div>
+                 <div className="flex justify-between items-center pt-4">
+                    <button onClick={() => setCurrentQuestionIndex(prev => prev - 1)} disabled={currentQuestionIndex === 0} className={`text-[9px] font-black uppercase tracking-widest ${currentQuestionIndex === 0 ? "opacity-0" : "text-slate-300 hover:text-orange-500"}`}>← Back</button>
+                    <button 
+                      onClick={currentQuestionIndex === questions.length - 1 ? () => submitQuestionnaire(answers) : () => setCurrentQuestionIndex(prev => prev + 1)} 
+                      disabled={!currentAnswer.trim() || isLoading}
+                      className="bg-orange-500 text-white px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 hover:-translate-y-1 transition-all disabled:opacity-50"
+                    >
+                      {isLoading ? "Analyzing..." : currentQuestionIndex === questions.length - 1 ? "Generate Blueprint 🚀" : "Continue →"}
+                    </button>
+                 </div>
+              </div>
+            )}
           </div>
         )}
       </div>

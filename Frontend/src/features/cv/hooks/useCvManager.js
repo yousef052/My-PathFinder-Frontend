@@ -73,7 +73,7 @@ export const useCvManager = () => {
     setIsComparing(true);
     setCompareResult(null);
     try {
-      // 💡 التأكد من إرسال مصفوفة أرقام نظيفة[cite: 30]
+      // التأكد من إرسال مصفوفة أرقام نظيفة
       const cleanIds = selectedCvsForCompare
         .map((id) => Number(id))
         .filter((id) => !isNaN(id));
@@ -81,7 +81,7 @@ export const useCvManager = () => {
       const response = await cvService.compareCvs(cleanIds);
       let rawData = response.data?.data || response.data;
 
-      // 💡 تحويل النص القادم من الـ AI إلى Object حقيقي[cite: 33]
+      // تحويل النص القادم من الـ AI إلى Object حقيقي
       if (typeof rawData === "string") {
         try {
           const cleaned = rawData

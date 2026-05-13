@@ -9,7 +9,7 @@ export const useSignUp = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    userName: "",
+    username: "",
     phoneNumber: "",
     email: "",
     password: "",
